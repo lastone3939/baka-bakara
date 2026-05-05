@@ -8,13 +8,34 @@ const MAX_RACE_ODDS = 20;
 const STORY_DURATION_MS = 30_000;
 const STORAGE_KEY = "make-sabi-100m-challenge-v3";
 const META_KEY = `${STORAGE_KEY}-meta`;
+const ATTEMPT_LIMIT_MESSAGE = "公式10回は終了。ここからはリベンジプレイで何度でも遊べます。";
 const CONFIG = window.BACCARAT_CONFIG || {};
+
+const LASTONE_FACE_PATHS = {
+  thinking: "assets/characters/lastone-thinking.png",
+  smug: "assets/characters/lastone-smug.png",
+  crying: "assets/characters/lastone-crying.png",
+  laughing: "assets/characters/lastone-laughing.png"
+};
 
 const SPORTS = {
   baccarat: { label: "バカラ", short: "BACCARAT", icon: "♠", tone: "baccarat" },
   horse: { label: "競馬", short: "KEIBA", icon: "馬", tone: "horse", min: 8, max: 12 },
   boat: { label: "競艇", short: "BOAT", icon: "艇", tone: "boat", min: 6, max: 6 },
   keirin: { label: "競輪", short: "KEIRIN", icon: "輪", tone: "keirin", min: 9, max: 9 }
+};
+
+const SPORT_ICON_SVG = {
+  baccarat: `<svg viewBox="0 0 72 72" aria-hidden="true"><path class="sport-solid" d="M36 8C22 23 13 31 13 43c0 9 7 16 16 16 3 0 6-1 8-4-1 6-5 10-11 12h20c-6-2-10-6-11-12 2 3 5 4 8 4 9 0 16-7 16-16C59 31 50 23 36 8Z"/></svg>`,
+  horse: `<svg viewBox="0 0 112 78" aria-hidden="true"><path class="sport-shadow" d="M14 66h82"/><path class="sport-solid" d="M24 37c6-13 18-20 39-17 10 2 17 7 22 16 7-10 15-15 23-9l-8 8 8 6-12 7-12-5c-5 11-17 18-35 17-18-1-30-9-34-20Z"/><path class="sport-line cut" d="M37 50 25 70M52 52l7 18M70 50l-4 20M83 43l15 21M42 27c10 5 27 6 40 1"/><path class="sport-line cut" d="M55 15c8-9 21-7 31 5l-5 12-21-8Z"/><circle class="sport-dot gold" cx="97" cy="33" r="3"/></svg>`,
+  boat: `<svg viewBox="0 0 112 78" aria-hidden="true"><path class="sport-wave" d="M8 62c17-8 32-8 49 0 18 8 34 8 51 0"/><path class="sport-solid" d="M9 42h82l17 10-25 15H27Z"/><path class="sport-solid dim" d="M38 21h37l18 21H23Z"/><path class="sport-line cut" d="M48 21v21M71 21v21M16 53c14-7 28-7 43 0"/></svg>`,
+  keirin: `<svg viewBox="0 0 112 78" aria-hidden="true"><path class="sport-shadow" d="M12 68h90"/><circle class="sport-wheel" cx="34" cy="53" r="17"/><circle class="sport-wheel" cx="82" cy="53" r="17"/><path class="sport-line" d="M34 53h28l15-29 14 29H62L49 31"/><path class="sport-line cut" d="M74 24h18l8-10M50 16c9-10 22-8 31 3M50 16l24 8-12 29M50 16 38 32"/></svg>`
+};
+
+const RACE_RUNNER_SVG = {
+  horse: `<svg class="runner-svg runner-horse" viewBox="0 0 128 72" aria-hidden="true"><path class="runner-shadow" d="M10 62h98"/><ellipse class="runner-fill" cx="52" cy="37" rx="35" ry="16"/><path class="runner-fill" d="M78 30c5-16 16-24 31-18l8 8-11 6 7 10-15 8-19-10Z"/><path class="runner-detail" d="M34 28c10 6 29 8 45 3M39 49L26 68M58 52l8 16M76 50l-5 18M90 44l17 20"/><circle class="runner-eye" cx="102" cy="22" r="2.5"/><path class="runner-rider" d="M55 17c7-8 19-6 28 5l-5 12-18-8Z"/></svg>`,
+  boat: `<svg class="runner-svg runner-boat" viewBox="0 0 128 72" aria-hidden="true"><path class="runner-wave" d="M8 60c18-8 34-8 52 0 17 7 34 7 55 0"/><path class="runner-fill" d="M10 39h91l16 10-25 13H29Z"/><path class="runner-cabin" d="M42 21h36l15 18H30Z"/><path class="runner-detail" d="M50 21v18M72 21v18M15 51c15-7 30-7 45 0"/></svg>`,
+  keirin: `<svg class="runner-svg runner-keirin" viewBox="0 0 128 72" aria-hidden="true"><path class="runner-shadow" d="M12 65h100"/><circle class="runner-wheel" cx="34" cy="49" r="17"/><circle class="runner-wheel" cx="92" cy="49" r="17"/><path class="runner-frame" d="M34 49h26l16-27 16 27H60L47 28"/><path class="runner-detail" d="M76 22h18l9-9M52 14c8-10 21-9 30 1M52 14l24 8-16 27M52 14L39 30"/></svg>`
 };
 
 const STORY_SCENES = [
@@ -83,6 +104,73 @@ const KEIRIN_NAMES = [
   "ブレーキ鳴き侍", "ベルだけ一流"
 ];
 
+const EXTRA_NAME_POOLS = {
+  horse: [
+    "未読スルー号", "家賃滞納スター", "利息ノビテル", "レシート紛失", "残高ゼロヨシ",
+    "経費デオチロ", "サイフカラッポ", "一発逆転丼", "請求書マーチ", "オールイン社長",
+    "海岸線ダッシュ", "空港マダトオイ", "水温チェック", "負けサビ二世", "明日支払王",
+    "ナンピン禁止令", "単勝一本釣り", "馬券ノ祈祷師", "焼肉キャンセル", "領収書ナイヨ",
+    "返済プランB", "深夜テンション", "銀行アプリ重い", "口座残像", "勝ったら寿司",
+    "負けたらモヤシ", "人生向こう正面", "最終直線土下座", "穴馬ノ誘惑", "本命コワイ",
+    "オッズ見過ぎ", "買ウナヨ絶対", "三連単ヤメロ", "複勝ニ逃ゲルナ", "払い戻し幻覚",
+    "電卓ガタガタ", "財布カウンター", "請求書リターン", "夜行バス検討", "浮き輪予約",
+    "出国ゲート前", "帰国便未定", "海パン試着中", "馬体重メンタル", "パドック反省会",
+    "推奨馬ゼンブ負け", "逆神ノ祝福", "ニンジン担保", "確率ノ勉強中", "期待値マイナス",
+    "人気薄ノ夢", "締切直前病", "実況ニ救ワレタ", "財布ノ葬列", "勝負服パジャマ",
+    "出走取消希望", "差シ脚ノ借金", "逃ゲ馬ノ現実", "追込ミ残業", "馬連ハズシ職人",
+    "単勝一点病", "生活防衛資金", "明細見タクナイ", "通知オフ希望", "赤字ノ末脚",
+    "黒字ニナリタイ", "オッズ十倍沼", "一番人気怖イ", "穴狙イ反省", "全財産ストレート",
+    "サウナ後ノ無敵感", "焼鳥一本勝負", "給料日前夜", "カード停止前", "財布ノ幽体離脱",
+    "払戻機ノ幻", "競馬場ノ風", "直線長スギ", "残高短スギ", "祈リノフォーム",
+    "勝利ノ前借リ", "負ケサビ熟成", "土壇場ノ靴紐", "夢見ル小銭", "未来ノ自分任セ",
+    "月末ノ逃亡者", "本命ノ裏切リ", "穴馬ノ営業", "外レ券コレクター", "勝ッタラ帰ル"
+  ],
+  boat: [
+    "佐伯航太", "水谷蓮司", "河野晴斗", "白川湊介", "黒瀬大和", "青井直人",
+    "赤羽亮", "緑山慎吾", "黄島拓真", "若松悠", "桐谷颯", "浜野圭吾",
+    "潮崎宗介", "波田野歩", "浦田龍之介", "真壁海斗", "三崎怜", "守屋隼人",
+    "大泊健吾", "島田航", "風間匠", "水野京介", "森川蒼", "江波純也",
+    "白波俊", "赤堀凪", "黒岩舜", "青柳航一", "黄瀬圭", "緑川海里",
+    "港谷翔", "津田優馬", "湾岸涼", "桟橋豪", "水面礼二", "波止場真",
+    "浮田賢", "泡坂一誠", "潮路仁", "艇王タケル", "江戸川ミナト", "住之江ハルト",
+    "蒲郡レン", "平和島リョウ", "若松ナギ", "芦屋ソウタ", "丸亀ユウ", "宮島カイ",
+    "多摩川タクミ", "戸田ショウ", "尼崎レイ", "児島マコト", "津ナオキ", "唐津リク",
+    "三国カズマ", "鳴門アキラ", "徳山ユウト", "下関ダイチ", "福岡シュン", "大村ヒカル",
+    "内枠信者", "展示タイム男", "まくり職人", "差し切り課長", "転覆回避兄貴", "水しぶき王子",
+    "海パン予備軍", "浮き輪マスター", "返済レーサー", "泡ノサラリーマン", "波間ノ領収書", "支払日前夜",
+    "万舟狙いマン", "堅実イン屋", "外枠ドリーマー", "直線ノ祈祷師", "ターン深男", "モーター音フェチ",
+    "スリット無言", "展示詐欺疑惑", "一マーク番長", "二マーク残業", "最終ターン神頼み", "バック水面刑事",
+    "荒波会計士", "回収率先生", "単勝ボートマン", "波乗リ請求書"
+  ],
+  keirin: [
+    "クロスバイク師匠", "電チャリ皇帝", "補助輪メンタル", "空気入れ番長", "前カゴ王者",
+    "サビサビ通勤号", "チェーン外レ丸", "ギア重スギ", "立ちこぎ主任", "パンク寸前",
+    "ベル鳴ラシ隊", "ライト点滅号", "雨の日ママチャリ", "サドル高杉", "カゴ曲ガリ",
+    "鍵ナクシ号", "二段ロック神", "駅前放置車", "通勤快速沼", "ロード沼先輩",
+    "ピスト無口", "競輪場ノ風", "ライン読み違い", "番手絶好ニキ", "まくり一閃",
+    "差し目ノ誘惑", "脚パンパン丸", "踏み直し侍", "残り半周病", "ジャン鳴リ待ち",
+    "ゴール前沈黙", "写真判定怖イ", "チャリ担保", "返済ペダル", "借金スプリント",
+    "全力立ち漕ぎ", "風除け人生", "自転車操業", "車券ノ幻", "低ギア高望み",
+    "高ギア低残高", "タイヤ細スギ", "ブレーキ甘男", "ハンドル遠イ", "サドル硬イ",
+    "人生バンク角", "最終四角勝負", "内抜け希望", "外踏み夢見", "脚力未払い",
+    "回転数過多", "ギア比ノ沼", "ママチャリ魂", "買物帰リ特急", "ペダル祈祷師",
+    "前輪ノ希望", "後輪ノ現実", "チェーン油不足", "二ケツ禁止令", "立体駐輪場王",
+    "鍵穴サビテル", "坂道ノ借入", "下り坂ノ人生", "上り坂ノ請求", "変速レバー神",
+    "六段変速沼", "ライト消シ忘レ", "盗難登録済", "駅前五分勝負", "歩道橋キツイ",
+    "ハンドル曲ガリ", "泥除け職人", "ペダル片方ナシ", "空気圧不足", "カゴ満載王",
+    "夜道反射板", "タイヤ太郎", "細タイヤ夢男", "固定ギア哲学", "補給食モヤシ",
+    "最終周回課金", "捲リノ土下座", "番手ノ沈黙", "先行逃亡者", "脚質未設定",
+    "残高スプリンター", "外帯線ノ夢", "内圏線ノ罠", "赤板ホームレス", "青板ブルース",
+    "白線ギリギリ", "競輪新聞熟読", "車券握リシメ", "払い戻し待機", "帰宅チャリ便"
+  ]
+};
+
+Object.entries(EXTRA_NAME_POOLS).forEach(([sport, names]) => {
+  if (sport === "horse") HORSE_NAMES.push(...names);
+  if (sport === "boat") BOAT_NAMES.push(...names);
+  if (sport === "keirin") KEIRIN_NAMES.push(...names);
+});
+
 const RACE_EVENTS = {
   horse: [
     "第3コーナーでニンジンの匂い。全馬の集中力が一瞬だけ生活感に寄る。",
@@ -121,6 +209,167 @@ const RACE_EVENTS = {
     "最終直線、サドル低すぎ丸が低い姿勢で世界を狙う。"
   ]
 };
+
+const EXTRA_RACE_EVENTS = {
+  horse: [
+    "ゲートが開いた。ラスワンの表情も少し開いたが、残高は閉じ気味。",
+    "1番人気が好位。人気者なのに返済能力まで背負わされている。",
+    "大外の馬、名前のわりに内面は堅実そうな走り。",
+    "中団でじっと我慢。ラスワンも請求書の通知をじっと無視。",
+    "ここでペースが上がる。スマホのバッテリーより先に心拍が減る。",
+    "向こう正面、風が強い。借金の向かい風ほどではない。",
+    "内で詰まる。人生でよく見る光景です。",
+    "先頭が入れ替わった。コメント欄の手のひらも一緒に回転。",
+    "3コーナー、穴人気がじわっと来た。財布はまだ疑っている。",
+    "お気に入り登録していない馬が、急に通知を鳴らしてきた。",
+    "先行勢が粘る。ラスワンの言い訳より粘っている。",
+    "後方から一気。明日の支払いも後方から追ってくる。",
+    "直線入口、全員が主人公みたいな顔をしている。",
+    "場内がざわつく。ざわつく時はだいたい買ってない。",
+    "実況席が少し笑った。これは展開が荒れる合図。",
+    "内ラチ沿いから伸びる。財布の伸びしろも信じたい。",
+    "ニンジン未払いが反応。食費だけは踏み倒せない。",
+    "明日ハヤイネンが加速。明日の支払いも早い。",
+    "ワンチャン銀河、名前のスケールだけは1億円級。",
+    "寝不足ダービー、まぶたは重いが脚は軽い。",
+    "カラアゲ定食が外を回る。急に腹が減る実況。",
+    "借入ブラック、名前の時点で審査が通らない走り。",
+    "残高スクショが進出。証拠だけは残したい。",
+    "ここで一頭が謎の二段加速。AIも少し困っている。",
+    "ラスト200、勝つ馬と負けサビの距離が縮まる。",
+    "残り100、祈りが馬券より厚くなってきた。",
+    "ゴール前、全員が請求書を振り切ろうとしている。",
+    "写真判定級の接戦。ラスワンの顔だけ先に判定負け。",
+    "人気薄が来そうな空気。空気だけなら無料。",
+    "最後にもう一伸び。希望が差し脚を覚えました。"
+  ],
+  boat: [
+    "ピット離れから空気が違う。ラスワンの財布だけ置いていかれた。",
+    "1号艇がインを主張。主張が通る世界、少しうらやましい。",
+    "スタート展示の記憶が急に役に立たない展開。",
+    "スリット通過、全艇ほぼ横一線。人生だけ縦一線。",
+    "1マーク、内が残すか外が飲むか。ラスワンは水を飲みたくない。",
+    "まくりに行った。言葉の圧だけで半分勝っている。",
+    "差しが入る。財布にも差し入れがほしい。",
+    "バックストレッチ、モーター音が支払い督促に聞こえる。",
+    "2番手争いが激しい。ラスワンの胃も激しい。",
+    "水面が荒れている。心の水面はさらに荒れている。",
+    "ここで外の艇が伸びる。買っていたら名実況だった。",
+    "ターンマークで一瞬ふくらむ。夢もふくらむが破れやすい。",
+    "イン逃げ濃厚。堅い展開ほど額が足りない。",
+    "2マーク、まだ逆転の余地。余地だけで家賃は払えない。",
+    "波多野が粘る。名前からして水面に強そう。",
+    "潮見のターンが深い。財布の谷も深い。",
+    "赤城が外から攻める。色も名前も強い。",
+    "白石が白い航跡を引く。領収書は黒い。",
+    "展示タイムよりコメント欄の手のひらが速い。",
+    "最終周回、海パンの存在感が増してきた。",
+    "1艇だけ別の風を掴んだ。ラスワンも掴みたい。",
+    "水しぶきが画面を叩く。目覚ましとしては強すぎる。",
+    "最終ターン、まだ差せる。気持ちだけは差せている。",
+    "外が届くか。届かなければ泳ぐ距離が届く。",
+    "内が残した。残ってほしいのは所持金です。",
+    "直線、エンジン音が急に説教っぽい。",
+    "ゴール前、舟券と人生が同時に震える。",
+    "勝者が見えた。買っているかどうかは別問題。",
+    "ラスワン、画面に近づきすぎて水しぶきを浴びそう。",
+    "決着。水面だけが全部知っていました。"
+  ],
+  keirin: [
+    "周回板が光る。ラスワンの残高も光ってほしい。",
+    "誘導が外れる前から、財布の誘導は失敗しています。",
+    "ラインができる。人生にもラインを引き直したい。",
+    "ママチャリ改、カゴの中に夢と領収書。",
+    "ロードバイク課長、会議より踏み込みが鋭い。",
+    "折りたたみの乱、今日は折れない気持ち。",
+    "電動アシスト兄貴、合法かどうかはゲームなので安心。",
+    "ピスト職人、無口に踏む。職人は言い訳しない。",
+    "通学チャリ号、遅刻ギリギリの伸び。",
+    "サドル低すぎ丸、姿勢の低さだけは世界基準。",
+    "買い物カゴSpecial、玉ねぎのような粘り。",
+    "ブレーキ鳴き侍、音だけで牽制している。",
+    "ベルだけ一流、やっぱりベルがうまい。",
+    "ジャン前、空気が変わる。ラスワンの顔色も変わる。",
+    "先行が踏む。踏み込みと踏み倒しは似て非なるもの。",
+    "番手が絶好。絶好なのに買っていないと地獄。",
+    "まくりが飛んでくる。請求書よりは遅い。",
+    "三番手から伸びる。地味だけど怖い。",
+    "最終バック、脚色が違う。財布の色も違う。",
+    "内で我慢。ラスワンも笑顔を我慢。",
+    "外並走、空気抵抗より支払い抵抗。",
+    "残り半周、全員の太ももが物語を語り始めた。",
+    "4コーナー、夢が外へ膨らむ。膨らみすぎ注意。",
+    "直線、ベルだけ一流がまだベルを主張。",
+    "ゴール線が近い。海岸線はもっと近い。",
+    "差したか、残したか。ラスワンの声だけ裏返った。",
+    "写真判定。チャリの種類で人生が決まる瞬間。",
+    "低すぎるサドルから高すぎる夢が伸びる。",
+    "最後の踏み込み、タイミーの通知より強い。",
+    "決着。脚は回った、運命も少し回った。"
+  ]
+};
+
+Object.entries(EXTRA_RACE_EVENTS).forEach(([sport, lines]) => {
+  RACE_EVENTS[sport].push(...lines);
+});
+
+const EXTRA_RACE_EVENTS_2 = {
+  horse: [
+    "ラスワンの買い目だけ、なぜか向こう正面で迷子。",
+    "単勝の文字が急に重い。100万円が背中に乗っている。",
+    "本命馬が堂々。堂々と負ける時もあるので油断は禁物。",
+    "穴馬がちらっと見えた。希望はいつもチラ見から始まる。",
+    "場内モニターに映る残高、たぶん一番走っていない。",
+    "ここで人気馬が動く。ラスワンの口角も少し動く。",
+    "外差しの気配。請求書も外から差してくる。",
+    "騎手の手が動いた。ラスワンの手汗も動いた。",
+    "直線の坂がきつい。明日の支払いほどではない。",
+    "人気薄が伸びると、人は急に神を信じ始めます。",
+    "馬群が割れた。財布の未来も割れそう。",
+    "ゴール板まであと少し。心拍はもうゴールしています。",
+    "勝ったら伝説、負けたら海辺の散歩。",
+    "買っている馬だけ、なぜかカメラから消える時間帯。",
+    "最後は脚色。ラスワンは顔色。"
+  ],
+  boat: [
+    "1マークの角度が鋭い。ラスワンの現実も鋭い。",
+    "水面に航跡、財布に傷跡。",
+    "外枠が夢を見る。夢を見るのは無料です。",
+    "インが強い。強いものにはだいたい倍率がつかない。",
+    "まくり差しの気配。用語だけで勝った気分になる。",
+    "波が跳ねるたび、所持金が小さく見える。",
+    "モーター音が上がる。ラスワンの言い訳も回転数上昇。",
+    "艇団が詰まった。支払い予定も詰まっている。",
+    "ここで勝負駆け。海パンだけはまだ待機。",
+    "ターンで膨らむ。夢も膨らむ。破裂音はまだしない。",
+    "白い航跡が美しい。赤字は美しくない。",
+    "水しぶきが派手。回収率は地味。",
+    "買っている艇が映るだけで、一瞬世界が許された気がする。",
+    "最終ターン、海がこちらを見ている。",
+    "直線勝負。祈りが水面を走る。"
+  ],
+  keirin: [
+    "誘導退避。ここから人間の太もも会議です。",
+    "ラインが伸びる。返済計画は伸びないでほしい。",
+    "番手絶好。絶好を買ってないと絶望。",
+    "外を踏む。外食はしばらく無理そう。",
+    "ジャンが鳴った。財布の警報音にも聞こえる。",
+    "先行が粘る。ラスワンの強がりも粘る。",
+    "まくり一発。人生も一発でまくりたい。",
+    "内に詰まった。スマホ容量みたいな詰まり方。",
+    "直線で脚が残っている。残高は残したい。",
+    "サドル低すぎ丸が今日も世界を低く見ている。",
+    "外並走で火花。口座アプリにも火花。",
+    "写真判定なら、ラスワンの顔も判定対象。",
+    "ゴール前、チャリの種類が運命を背負う。",
+    "踏み直し。人生も踏み直し。",
+    "決着の鐘。財布は無音。"
+  ]
+};
+
+Object.entries(EXTRA_RACE_EVENTS_2).forEach(([sport, lines]) => {
+  RACE_EVENTS[sport].push(...lines);
+});
 
 const BACCARAT_CHAOS_EVENTS = [
   "カードを開いた瞬間、明日の請求書が一歩下がった。",
@@ -226,7 +475,27 @@ const LOSE_COMMENTS = [
   "負けたけど、コメント欄は盛り上がる。たぶん。",
   "大丈夫、まだ海パンは履いてない。",
   "支払いまであと1億。所持金は反抗期。",
-  "今の負け、音だけは高級だった。"
+  "今の負け、音だけは高級だった。",
+  "ラスワンの表情が、急に通信制限みたいになった。",
+  "残高が手を振っている。戻ってくるとは言っていない。",
+  "明日の支払いに既読がつきました。",
+  "今の負け方、スクショより深呼吸が必要。",
+  "財布の防御力が紙コップでした。",
+  "一瞬だけ未来が見えた。全部青ざめていた。",
+  "流れを変える前に、生活を変えたくなってきた。",
+  "海岸線がチュートリアルを始めました。",
+  "負けサビが熟成されて、もはや名産品。",
+  "ラスワン、笑顔のロード時間が長い。",
+  "この負けは教材。授業料が高い。",
+  "チップが消えた場所に、謎の静寂だけ残った。",
+  "画面は派手。所持金は質素。",
+  "勝負勘より水泳フォームを鍛える時間です。",
+  "返済計画が一瞬フリーズしました。",
+  "空港ではなく、砂浜が手招きしている。",
+  "今のは運負け。そう言い切る勇気だけは勝った。",
+  "負けた瞬間、BGMだけプロっぽくなった。",
+  "ラスワンの心に、そっとタイミーの通知。",
+  "ここで引いたら物語。続けたらドキュメンタリー。"
 ];
 
 const WIN_COMMENTS = [
@@ -257,7 +526,27 @@ const BANKRUPT_TICKER_LINES = [
   "チップは旅立ちました。帰国予定は未定です。",
   "明日の支払いが拍手をやめません。",
   "水温チェックを始めるには、ちょうどいい残高です。",
-  "今なら反省だけが無料で増えます。"
+  "今なら反省だけが無料で増えます。",
+  "臨時ニュース：100万円、現場から姿を消しました。",
+  "空港券売機が、なぜか水着売り場を案内しています。",
+  "ラスワンの財布、ここで一旦エンドロール。",
+  "スタッフロールにタイミーが協賛で入りました。",
+  "『泳いで帰国』の文字が、やけに高解像度です。",
+  "次の挑戦までに、肺活量だけ上げておきましょう。",
+  "残高0円。画面の光だけが優しい。",
+  "負けサビは消えました。サビ跡は残りました。",
+  "海パン購入ボタンは、まだ実装していません。",
+  "現実がログインしてきました。",
+  "1億の支払いが、そっと椅子を引いて待っています。",
+  "実況席、言葉を選んでいます。選びきれません。",
+  "この負けは伝説です。主に反面教師として。",
+  "ラスワン、しばらく水平線と面談です。",
+  "財布の中身が、完全にオフラインになりました。",
+  "勝負は終わり。海は始まり。",
+  "残ったのはスクショと、妙な達成感だけ。",
+  "次回、負けサビ100万円ふたたび。",
+  "ゲームオーバーですが、ネタとしては続行可能です。",
+  "海岸までのルート検索が、なぜか最短です。"
 ];
 
 let state = loadState();
@@ -283,6 +572,7 @@ let isDealing = false;
 let isRaceRunning = false;
 let raceToken = 0;
 let raceProgress = {};
+let raceMood = "通常";
 let authReady = false;
 let authUser = null;
 let authProfile = null;
@@ -461,9 +751,9 @@ function createRaceProbabilities(count, sport) {
   const maxProb = RACE_PAYOUT_RATE / MIN_RACE_ODDS;
   const weights = Array.from({ length: count }, (_, index) => {
     const base = Math.pow(Math.random(), sport === "horse" ? 1.65 : 1.35) + 0.04;
-    const favoriteBoost = index === 0 ? 1.9 + Math.random() * 1.9 : 1;
-    const secondBoost = index === 1 && Math.random() < 0.72 ? 1.15 + Math.random() * 1.2 : 1;
-    const longshotDrag = index > Math.floor(count * 0.62) ? 0.48 + Math.random() * 0.58 : 1;
+    const favoriteBoost = index === 0 ? (sport === "boat" ? 4.8 : 4.2) + Math.random() * 3.2 : 1;
+    const secondBoost = index === 1 && Math.random() < 0.78 ? 1.6 + Math.random() * 1.6 : 1;
+    const longshotDrag = index > Math.floor(count * 0.62) ? 0.32 + Math.random() * 0.5 : 1;
     return base * favoriteBoost * secondBoost * longshotDrag;
   }).sort(() => Math.random() - 0.5);
 
@@ -717,7 +1007,33 @@ function formatPlain(value) {
   return Math.trunc(value).toLocaleString("ja-JP");
 }
 
+function proofCode() {
+  return `${meta.currentAttemptId || meta.installId}`.replace(/-/g, "").slice(0, 10).toUpperCase();
+}
+
+function attemptsLeft() {
+  return Math.max(0, OFFICIAL_ATTEMPT_LIMIT - meta.officialAttemptsUsed);
+}
+
+function canContinueAttempt() {
+  return meta.currentAttemptConsumed && state.status === "playing";
+}
+
+function canStartAttempt() {
+  return true;
+}
+
+function blockAttemptLimit() {
+  titleSeen = false;
+  localStorage.removeItem(`${STORAGE_KEY}-title-seen`);
+  const hint = $("#authHint");
+  if (hint) hint.textContent = ATTEMPT_LIMIT_MESSAGE;
+  playTone("danger");
+  render();
+}
+
 function attemptMessage() {
+  if (attemptsLeft() <= 0 && !meta.currentAttemptOfficial) return ATTEMPT_LIMIT_MESSAGE;
   return `${meta.attemptNumber}回目の挑戦。公式10回以内で1億いけたらスクショで伝説。`;
 }
 
@@ -756,6 +1072,7 @@ function render() {
   $("#officialAttemptStatus").textContent = officialStatusText();
   renderAuth();
   renderSportTabs();
+  renderVenueIcons();
 
   $("#currentChip").textContent = formatPlain(currentChip);
   const totalBet = raceMode ? sumRaceBets() : sumBets(activeBets);
@@ -833,12 +1150,16 @@ function renderCards(round) {
 }
 
 function officialStatusText() {
-  if (!supabaseReady()) return "ゲストプレイ";
+  if (!supabaseReady()) return attemptsLeft() <= 0 && !meta.currentAttemptOfficial
+    ? "リベンジ"
+    : `ゲスト ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
   if (!authReady) return "認証確認中";
-  if (!authUser) return "ログイン待ち";
-  const left = Math.max(0, OFFICIAL_ATTEMPT_LIMIT - meta.officialAttemptsUsed);
+  if (!authUser) return attemptsLeft() <= 0 && !meta.currentAttemptOfficial
+    ? "リベンジ"
+    : `ゲスト公式 ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
+  const left = attemptsLeft();
   if (meta.currentAttemptOfficial) return `公式 ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
-  if (left <= 0) return "公式枠終了 / フリー";
+  if (left <= 0) return "リベンジ";
   return `公式残り${left}回`;
 }
 
@@ -848,49 +1169,72 @@ function renderAuth() {
   const google = $("#googleLogin");
   const emailBox = $("#emailLoginBox");
   if (!status || !hint || !google) return;
+  const startButton = $("#startGame");
+  const quotaOpen = canStartAttempt();
+  const left = attemptsLeft();
 
   if (!supabaseReady()) {
-    status.textContent = "ゲストプレイ";
-    hint.textContent = "このまま体験プレイできます。クリアしたらスクショで証明できます。";
+    status.textContent = `ゲスト ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
+    hint.textContent = left > 0
+      ? `ログインなしで残り${left}回。キャッシュを消さなければ続きから遊べます。`
+      : ATTEMPT_LIMIT_MESSAGE;
     google.disabled = false;
-    google.textContent = "ゲストでゲームスタート";
+    google.textContent = left > 0 ? "ゲスト公式で開始" : "リベンジで開始";
     if (emailBox) emailBox.style.display = "none";
-    $("#startGame").textContent = "ゲストでゲームスタート";
+    startButton.textContent = left > 0 ? "公式チャレンジ開始" : "リベンジでゲームスタート";
+    startButton.disabled = false;
     return;
   }
 
   google.disabled = !authReady;
+  startButton.disabled = !authReady;
   if (!authReady) {
     status.textContent = "認証確認中";
     hint.textContent = "ログイン状態を確認しています。";
     google.textContent = "確認中";
-    $("#startGame").textContent = "準備中";
+    startButton.textContent = "準備中";
     return;
   }
 
   if (authUser) {
-    status.textContent = `${authUser.email || "Google"} / ${meta.officialAttemptsUsed}回使用`;
-    hint.textContent = meta.officialAttemptsUsed >= OFFICIAL_ATTEMPT_LIMIT
-      ? "公式10回は終了。以降はフリープレイです。"
-      : "このアカウントで公式達成証明を残せます。";
-    google.textContent = "ゲームスタート";
+    status.textContent = `${authUser.email || "Google"} / ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
+    hint.textContent = left > 0
+      ? `このGoogle IDで残り${left}回。公式達成証明を残せます。`
+      : ATTEMPT_LIMIT_MESSAGE;
+    google.textContent = left > 0 ? "ゲームスタート" : "リベンジでゲームスタート";
     google.disabled = false;
-    $("#startGame").textContent = "ゲームスタート";
+    startButton.textContent = left > 0 ? "ゲームスタート" : "リベンジでゲームスタート";
+    startButton.disabled = false;
     if (emailBox) emailBox.style.display = "none";
     return;
   }
 
-  status.textContent = "未ログイン";
-  hint.textContent = "Googleログインで公式挑戦を開始します。";
-  google.textContent = "Googleでログイン";
+  status.textContent = `ゲスト公式 ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
+  hint.textContent = left > 0
+    ? `ログインなしで開始できます。Google連携すると達成証明が強くなります。`
+    : ATTEMPT_LIMIT_MESSAGE;
+  google.textContent = "Googleで証明をつける";
   google.disabled = false;
-  $("#startGame").textContent = "ログインしてゲームスタート";
+  startButton.textContent = left > 0 ? "公式チャレンジ開始" : "リベンジでゲームスタート";
+  startButton.disabled = false;
   if (emailBox) emailBox.style.display = "none";
 }
 
 function renderSportTabs() {
   $$(".sport-tab").forEach((button) => {
     button.classList.toggle("active", button.dataset.sport === currentSport());
+  });
+}
+
+function renderVenueIcons() {
+  $$("[data-venue-sport]").forEach((button) => {
+    const sport = button.dataset.venueSport;
+    const icon = button.querySelector("span");
+    if (icon && SPORT_ICON_SVG[sport] && icon.dataset.svgReady !== "1") {
+      icon.classList.add("venue-svg-icon");
+      icon.innerHTML = SPORT_ICON_SVG[sport];
+      icon.dataset.svgReady = "1";
+    }
   });
 }
 
@@ -907,10 +1251,12 @@ function renderRace() {
   race.participants.forEach((entry) => {
     const lane = document.createElement("div");
     lane.className = `race-lane${race.result?.winnerId === entry.id ? " winner" : ""}`;
+    lane.dataset.sport = race.sport;
     const progress = raceProgress[entry.id] || 0;
     lane.innerHTML = `
       <div class="race-lane-number">${entry.number}</div>
       <div class="race-lane-road">
+        <div class="race-lane-label"><b>${entry.name}</b><span>${formatOdds(entry.odds)}x</span></div>
         <div class="race-lane-glow"></div>
         <div class="race-runner" style="--runner-color:${entry.color}; --race-progress:${progress}%">${raceIcon(race.sport)}</div>
       </div>
@@ -944,12 +1290,12 @@ function renderRace() {
   const amount = selected ? state.raceBets?.[selected.id] || 0 : 0;
   $("#raceTicketName").textContent = selected ? `${selected.number} ${selected.name} / ${formatOdds(selected.odds)}倍` : "未選択";
   $("#raceTicketAmount").textContent = `${formatPlain(amount)}円`;
+  renderRaceShowcase(race);
+  renderRaceBroadcast(race);
 }
 
 function raceIcon(sport) {
-  if (sport === "horse") return "馬";
-  if (sport === "boat") return "艇";
-  return "輪";
+  return RACE_RUNNER_SVG[sport] || SPORT_ICON_SVG.baccarat;
 }
 
 function formatOdds(value) {
@@ -960,6 +1306,73 @@ function raceFlavor(entry, sport) {
   if (sport === "horse") return entry.number % 3 === 0 ? "末脚だけは上場企業" : entry.number % 2 === 0 ? "ニンジン反応良好" : "返済意識は高い";
   if (sport === "boat") return entry.number <= 2 ? "イン逃げ気配" : entry.number <= 4 ? "まくり警戒" : "外から夢を見る";
   return entry.number % 2 === 0 ? "ギア比より気合" : "サドル位置が哲学";
+}
+
+function renderRaceShowcase(race) {
+  const icon = $("#raceShowcaseIcon");
+  if (!icon) return;
+  icon.innerHTML = raceIcon(race.sport);
+  $("#raceVenueLabel").textContent = raceVenueLabel(race.sport);
+  $("#raceMainCall").textContent = raceMainCall(race);
+  $("#raceOddsSummary").textContent = raceOddsSummary(race);
+  const face = $("#raceCommentatorFace");
+  if (face) face.src = LASTONE_FACE_PATHS[raceCommentatorMood(race)];
+}
+
+function raceVenueLabel(sport) {
+  if (sport === "horse") return "負けサビ競馬場 / 単勝";
+  if (sport === "boat") return "負けサビ水面 / 単勝";
+  if (sport === "keirin") return "負けサビバンク / 単勝";
+  return "負けサビ本店";
+}
+
+function raceMainCall(race) {
+  const favorite = race.participants.reduce((best, entry) => entry.odds < best.odds ? entry : best, race.participants[0]);
+  if (isRaceRunning) return `${leaderEntry()?.name || favorite.name}が前へ出る`;
+  return `本命 ${favorite.number} ${favorite.name} / ${formatOdds(favorite.odds)}倍`;
+}
+
+function raceOddsSummary(race) {
+  const longshot = race.participants.reduce((best, entry) => entry.odds > best.odds ? entry : best, race.participants[0]);
+  return `${raceExpectedReturnText()} / 大穴 ${longshot.number} ${formatOdds(longshot.odds)}倍`;
+}
+
+function raceCommentatorMood(race) {
+  const selected = selectedRaceParticipant();
+  const stake = selected ? state.raceBets?.[selected.id] || 0 : 0;
+  if (isRaceRunning) return "thinking";
+  if (stake >= Math.max(100_000, state.bankroll * 0.55)) return "crying";
+  const favorite = race.participants.reduce((best, entry) => entry.odds < best.odds ? entry : best, race.participants[0]);
+  if (selected?.id === favorite.id) return "smug";
+  if ((selected?.odds || 0) >= 12) return "laughing";
+  return "thinking";
+}
+
+function renderRaceBroadcast(race = state.currentRace) {
+  if (!race || !$("#raceLeaderName")) return;
+  const leader = leaderEntry();
+  const topProgress = leader ? Math.max(0, raceProgress[leader.id] || 0) : 0;
+  const remaining = Math.max(0, Math.round(1000 - topProgress * 10));
+  $("#raceLeaderName").textContent = leader ? `${leader.number} ${leader.name}` : "-";
+  $("#raceDistance").textContent = isRaceRunning ? `残り${remaining}m` : "待機中";
+  $("#raceTension").textContent = isRaceRunning ? raceMood : oddsHeatLabel(race);
+  if ($("#raceMainCall")) $("#raceMainCall").textContent = raceMainCall(race);
+}
+
+function leaderEntry() {
+  const race = state.currentRace;
+  if (!race?.participants?.length) return null;
+  return race.participants.reduce((leader, entry) => {
+    if (!leader) return entry;
+    return (raceProgress[entry.id] || 0) > (raceProgress[leader.id] || 0) ? entry : leader;
+  }, null);
+}
+
+function oddsHeatLabel(race) {
+  const favorite = race.participants.reduce((best, entry) => entry.odds < best.odds ? entry : best, race.participants[0]);
+  if (favorite.odds <= 1.6) return "本命濃厚";
+  if (favorite.odds <= 2.4) return "本命あり";
+  return "波乱含み";
 }
 
 function scoreForVisible(cards) {
@@ -1323,6 +1736,7 @@ function beginRound() {
     return;
   }
 
+  const allInRound = total === state.bankroll;
   previousBets = { ...activeBets };
   pendingRound = dealRound();
   displayedRound = pendingRound;
@@ -1334,7 +1748,7 @@ function beginRound() {
   roundToken += 1;
   $("#dealButtonText").textContent = "配牌中";
   $("#dealerMessage").textContent = "カードを配ります";
-  playTone(total === state.bankroll ? "allin" : "deal");
+  playTone(allInRound ? "allin" : "deal");
   vibrate(20);
   render();
   playDealSequence(roundToken);
@@ -1353,6 +1767,7 @@ async function beginRace() {
   state.previousRaceBets = { ...state.raceBets };
   state.bankroll -= total;
   isRaceRunning = true;
+  raceMood = "発走前";
   raceToken += 1;
   race.result = null;
   raceProgress = Object.fromEntries(race.participants.map((entry) => [entry.id, 0]));
@@ -1403,14 +1818,17 @@ async function playRaceAnimation(token, race, winner, settlement) {
     if (step % eventEvery === 0) {
       const line = eventPool[(step / eventEvery - 1) % eventPool.length] || "勝負どころ。ラスワンの呼吸だけが荒い。";
       $("#raceCommentary").textContent = line;
+      raceMood = raceMoodForLine(line, t);
       triggerRaceMidEvent(line);
       playTone("raceTick");
     }
+    if (step % 2 === 0) renderRaceBroadcast(race);
     await delay(tick);
   }
 
   if (token !== raceToken || !isRaceRunning) return;
   raceProgress[winner.id] = 98;
+  raceMood = "写真判定";
   race.participants.forEach((entry) => {
     if (entry.id !== winner.id) raceProgress[entry.id] = Math.min(raceProgress[entry.id] || 0, 91 - Math.random() * 8);
   });
@@ -1427,15 +1845,21 @@ function updateRaceProgressDom() {
     if (entry && runner) runner.style.setProperty("--race-progress", `${raceProgress[entry.id] || 0}%`);
     lane.classList.toggle("leader", entry && leaderEntryId() === entry.id);
   });
+  renderRaceBroadcast();
+}
+
+function raceMoodForLine(line, t) {
+  if (line.includes("隕石")) return "異常気象";
+  if (line.includes("ニンジン")) return "人参反応";
+  if (line.includes("海パン") || line.includes("波") || line.includes("水")) return "水温注意";
+  if (line.includes("ベル") || line.includes("ジャン")) return "鐘鳴り";
+  if (t > 0.78) return "最終勝負";
+  if (t > 0.48) return "差し合い";
+  return "序盤牽制";
 }
 
 function leaderEntryId() {
-  const race = state.currentRace;
-  if (!race) return null;
-  return race.participants.reduce((leader, entry) => {
-    if (!leader) return entry;
-    return (raceProgress[entry.id] || 0) > (raceProgress[leader.id] || 0) ? entry : leader;
-  }, null)?.id || null;
+  return leaderEntry()?.id || null;
 }
 
 function settleRace(race, settlement) {
@@ -1480,6 +1904,7 @@ function settleRace(race, settlement) {
   state.raceBets = {};
   state.selectedRaceId = state.currentRace.participants[0]?.id || null;
   raceProgress = {};
+  raceMood = settlement.net > 0 ? "的中余韻" : "反省会";
   render();
   checkEnding();
 }
@@ -1795,12 +2220,13 @@ function checkEnding() {
     $("#endingMoney").textContent = formatYen(state.bankroll);
     stopEndingTicker();
     $("#proofText").textContent = meta.currentAttemptOfficial
-      ? `公式${meta.officialAttemptsUsed}/10回目で達成。スクショしてXへ。`
-      : "フリープレイ達成。公式証明はGoogleログイン時のみ。";
-    $("#shareResult").textContent = "Xに投稿";
-    $("#restartGame").textContent = "次の挑戦へ";
+      ? `公式${meta.officialAttemptsUsed}/10回以内クリア / 証明ID ${proofCode()}`
+      : `リベンジクリア / 証明ID ${proofCode()}`;
+    $("#shareResult").textContent = "クリアをXに投稿";
+    $("#restartGame").textContent = attemptsLeft() > 0 ? "次の公式挑戦へ" : "リベンジでもう一度";
     $("#endingOverlay").classList.add("open");
     $("#endingOverlay").setAttribute("aria-hidden", "false");
+    updateOfficialProfile();
     syncPlayer();
   }
 
@@ -1810,9 +2236,11 @@ function checkEnding() {
     $("#endingTitle").textContent = failure.title;
     $("#endingMessage").textContent = `${meta.attemptNumber}回目の挑戦は${state.rounds}勝負で終了。${failure.text}`;
     $("#endingMoney").textContent = formatYen(state.maxBankroll);
-    $("#proofText").textContent = "破産証明。これはこれでスクショ価値があります。";
+    $("#proofText").textContent = meta.currentAttemptOfficial
+      ? `公式${meta.officialAttemptsUsed}/10回目終了 / 証明ID ${proofCode()}`
+      : `リベンジ終了 / 証明ID ${proofCode()}`;
     $("#shareResult").textContent = "負けをXに投稿";
-    $("#restartGame").textContent = "次の挑戦へ";
+    $("#restartGame").textContent = attemptsLeft() > 0 ? "次の公式挑戦へ" : "リベンジでもう一度";
     startEndingTicker();
     $("#endingOverlay").classList.add("open");
     $("#endingOverlay").setAttribute("aria-hidden", "false");
@@ -1927,18 +2355,23 @@ function startBgm(kind) {
   stopBgm();
   bgmKind = kind;
   const patterns = {
-    story: [[196, 247, 330], [174, 220, 294], [196, 262, 392]],
-    baccarat: [[110, 220, 330], [123, 246, 370], [98, 196, 294]],
-    horse: [[147, 294, 440], [165, 330, 494], [196, 392, 587]],
-    boat: [[98, 196, 294], [110, 220, 330], [130, 260, 390]],
-    keirin: [[130, 260, 520], [146, 293, 586], [164, 329, 659]]
+    story: { tempo: 720, bass: [98, 110, 123, 98], lead: [196, 247, 330, 392, 330, 247], type: "triangle" },
+    baccarat: { tempo: 360, bass: [82, 98, 110, 123], lead: [220, 330, 392, 440, 392, 330], type: "sawtooth" },
+    horse: { tempo: 240, bass: [98, 147, 110, 165], lead: [294, 440, 392, 494, 587, 440, 330, 392], type: "triangle" },
+    boat: { tempo: 260, bass: [73, 98, 110, 98], lead: [196, 294, 330, 392, 330, 260, 294, 220], type: "sine" },
+    keirin: { tempo: 220, bass: [82, 130, 146, 164], lead: [260, 390, 520, 586, 659, 520, 390, 329], type: "square" }
   };
-  let index = 0;
+  const pattern = patterns[kind] || patterns.baccarat;
+  let step = 0;
   bgmTimer = window.setInterval(() => {
-    const notes = patterns[kind]?.[index % (patterns[kind]?.length || 1)] || patterns.baccarat[index % 3];
-    playChord(notes, 0.012, 0.34, kind === "boat" ? "sine" : "triangle");
-    index += 1;
-  }, kind === "story" ? 2200 : 2800);
+    const bass = pattern.bass[Math.floor(step / 4) % pattern.bass.length];
+    const lead = pattern.lead[step % pattern.lead.length];
+    if (step % 2 === 0) playChord([bass, bass * 2], 0.009, kind === "story" ? 0.42 : 0.16, pattern.type);
+    if (step % 4 === 1 || step % 8 === 5) playChord([lead], 0.008, 0.12, kind === "keirin" ? "square" : "triangle");
+    if (kind !== "story" && step % 4 === 2) playNoise(kind === "boat" ? 0.012 : 0.007, kind === "boat" ? 0.18 : 0.06);
+    if (kind === "horse" && step % 8 === 6) playChord([196, 294], 0.007, 0.09, "square");
+    step += 1;
+  }, pattern.tempo);
 }
 
 function stopBgm() {
@@ -1967,6 +2400,27 @@ function playChord(notes, volume, hold, type = "triangle") {
     osc.start(start);
     osc.stop(start + hold + 0.05);
   });
+}
+
+function playNoise(volume = 0.008, hold = 0.08) {
+  if (!soundEnabled) return;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  audioCtx ||= new AudioContext();
+  const ctx = audioCtx;
+  if (ctx.state === "suspended") ctx.resume();
+  const bufferSize = Math.floor(ctx.sampleRate * hold);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i += 1) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  const source = ctx.createBufferSource();
+  const gain = ctx.createGain();
+  source.buffer = buffer;
+  gain.gain.setValueAtTime(volume, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + hold);
+  source.connect(gain).connect(ctx.destination);
+  source.start();
+  source.stop(ctx.currentTime + hold);
 }
 
 function vibrate(pattern) {
@@ -1999,19 +2453,20 @@ function openPanel(tab = "main") {
 }
 
 async function startGameFlow(openRules = false) {
+  if (!canStartAttempt()) {
+    blockAttemptLimit();
+    return;
+  }
   if (supabaseReady() && !authReady) {
     $("#authHint").textContent = "認証確認中です。数秒待ってからもう一度押してください。";
     playTone("danger");
     return;
   }
-  if (supabaseReady() && authReady && !authUser) {
-    $("#authHint").textContent = "Googleログイン画面へ移動します。";
-    sessionStorage.setItem(`${STORAGE_KEY}-pending-start`, openRules ? "rules" : "game");
-    playTone("start");
-    await loginWithGoogle();
+  const allowed = await consumeOfficialAttempt();
+  if (!allowed) {
+    blockAttemptLimit();
     return;
   }
-  await consumeOfficialAttempt();
   if (!meta.storySeen) {
     await playOpeningStory();
     meta.storySeen = true;
@@ -2082,6 +2537,7 @@ function selectSport(sport) {
   }
   state.activeSport = sport;
   if (isRaceSport(sport)) ensureRace(true);
+  raceMood = "通常";
   activeBets = blankBets();
   state.raceBets = {};
   selectedBetKey = sport === "baccarat" ? selectedBetKey : selectedBetKey;
@@ -2209,20 +2665,58 @@ async function updateOfficialProfile() {
 }
 
 async function consumeOfficialAttempt() {
-  if (meta.currentAttemptConsumed) return meta.currentAttemptOfficial;
-  meta.currentAttemptConsumed = true;
+  if (meta.currentAttemptConsumed) return true;
+  if (meta.officialAttemptsUsed >= OFFICIAL_ATTEMPT_LIMIT) {
+    meta.currentAttemptOfficial = false;
+    meta.currentAttemptConsumed = true;
+    saveMeta();
+    render();
+    return true;
+  }
 
-  if (supabaseReady() && authUser && meta.officialAttemptsUsed < OFFICIAL_ATTEMPT_LIMIT) {
+  if (supabaseReady() && authUser) {
+    const allowed = await consumeRemoteOfficialAttempt();
+    if (!allowed) {
+      meta.currentAttemptOfficial = false;
+      meta.currentAttemptConsumed = true;
+      saveMeta();
+      render();
+      return true;
+    }
+  } else {
+    meta.officialAttemptsUsed += 1;
+    meta.currentAttemptOfficial = true;
+  }
+
+  meta.currentAttemptConsumed = true;
+  saveMeta();
+  render();
+  return true;
+}
+
+async function consumeRemoteOfficialAttempt() {
+  try {
+    const { data, error } = await supabaseClient.rpc("consume_official_attempt");
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row?.allowed) {
+      meta.officialAttemptsUsed = Number(row?.attempts_used ?? OFFICIAL_ATTEMPT_LIMIT);
+      meta.currentAttemptOfficial = false;
+      saveMeta();
+      render();
+      return false;
+    }
+    meta.officialAttemptsUsed = Number(row.attempts_used || meta.officialAttemptsUsed + 1);
+    meta.officialClears = Number(row.official_clears || meta.officialClears);
+    meta.currentAttemptOfficial = true;
+    return true;
+  } catch (error) {
+    console.warn("Official attempt RPC skipped:", error.message);
     meta.officialAttemptsUsed += 1;
     meta.currentAttemptOfficial = true;
     await updateOfficialProfile();
-  } else {
-    meta.currentAttemptOfficial = false;
+    return true;
   }
-
-  saveMeta();
-  render();
-  return meta.currentAttemptOfficial;
 }
 
 async function loginWithGoogle() {
@@ -2358,7 +2852,15 @@ function wireEvents() {
 
   $("#startGame").addEventListener("click", () => startGameFlow(false));
   $("#openHowTo").addEventListener("click", () => startGameFlow(true));
-  $("#googleLogin").addEventListener("click", () => startGameFlow(false));
+  $("#googleLogin").addEventListener("click", () => {
+    if (!supabaseReady()) {
+      startGameFlow(false);
+      return;
+    }
+    $("#authHint").textContent = "Googleログイン画面へ移動します。ログイン後は同じボタンで続きから遊べます。";
+    playTone("start");
+    loginWithGoogle();
+  });
   $("#emailLogin").addEventListener("click", loginWithEmail);
 
   $$(".bet-tile, .side-tile").forEach((button) => {
@@ -2447,7 +2949,8 @@ function wireEvents() {
   $("#missionButton").addEventListener("click", () => openPanel("achievements"));
   $("#moreHistory").addEventListener("click", () => openPanel("history"));
   $("#shareResult").addEventListener("click", () => {
-    const text = encodeURIComponent(`ラスワンの負けサビ1億円になるまで帰れません：${meta.attemptNumber}回目、${state.rounds}勝負で${formatYen(state.bankroll)}まで到達。`);
+    const mode = meta.currentAttemptOfficial ? `公式${meta.officialAttemptsUsed}/10` : "リベンジ";
+    const text = encodeURIComponent(`ラスワンの負けサビ1億円になるまで帰れません：${mode}、${meta.attemptNumber}回目、${state.rounds}勝負で${formatYen(state.bankroll)}まで到達。証明ID ${proofCode()}`);
     window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank", "noopener");
   });
   $("#endingStats").addEventListener("click", () => {

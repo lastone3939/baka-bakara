@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node --check app.js && node scripts/build.mjs --check"
+    "check": "node --check app.js && node scripts/build.mjs --check",
+    "odds:audit": "node scripts/odds-audit.mjs"
   }
 }

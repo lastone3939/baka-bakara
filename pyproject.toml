@@ -1,0 +1,7 @@
+[project]
+name = "baccarat-100m-challenge-tools"
+version = "0.1.0"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "browser-use>=0.12.6",
+]

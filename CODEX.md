@@ -119,10 +119,12 @@ QA:
 - ストーリー: 明日1億支払い。手元には韓国で負けた後の負けサビ100万円だけ。
 - 体験: スマホファースト。配信で見ても一瞬で状況がわかる。
 - ゲーム性: バカラの標準ドロールールを守る。P PAIRとB PAIRは別ベット。
+- 挑戦制限: Supabase設定時はGoogle IDごと10回を `consume_official_attempt()` RPCで消費する。未設定時は端末ローカルで公式10回を保存し、10回後はリベンジプレイとして継続できる。
 - 重要操作: ベット、オールイン、配牌、結果、履歴、実績。
 - デザイン: 派手だが、操作面は読みやすく押しやすくする。
 - 公開: `npm run check && npm run build` 後、`dist/` または `baccarat-100m-release.zip` をNetlifyへ入れる。
 - お客さん向けUIにはSupabaseなどの裏側の管理名を出さない。
+- ブラウザ操作: OSS版 Browser Harness は `uv` + Python 3.12で導入済み。詳細は `BROWSER_HARNESS.md`。
 
 ## 画像・アニメーション方針
 

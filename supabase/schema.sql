@@ -60,11 +60,58 @@ create index if not exists challenge_rounds_install_attempt_idx
 create index if not exists challenge_players_auth_user_idx
   on public.challenge_players (auth_user_id);
 
+create or replace function public.consume_official_attempt()
+returns table (
+  allowed boolean,
+  attempts_used integer,
+  attempts_left integer,
+  official_clears integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  requester uuid := auth.uid();
+  updated_attempts integer;
+  clear_total integer;
+begin
+  if requester is null then
+    raise exception 'login required';
+  end if;
+
+  insert into public.challenge_profiles (user_id, email)
+  values (requester, auth.jwt() ->> 'email')
+  on conflict (user_id) do nothing;
+
+  update public.challenge_profiles
+    set official_attempts_used = official_attempts_used + 1,
+        email = coalesce(auth.jwt() ->> 'email', email),
+        updated_at = now()
+    where user_id = requester
+      and official_attempts_used < 10
+    returning official_attempts_used, official_clears
+    into updated_attempts, clear_total;
+
+  if updated_attempts is null then
+    select official_attempts_used, official_clears
+      into updated_attempts, clear_total
+      from public.challenge_profiles
+      where user_id = requester;
+    return query select false, updated_attempts, greatest(0, 10 - updated_attempts), clear_total;
+    return;
+  end if;
+
+  return query select true, updated_attempts, greatest(0, 10 - updated_attempts), clear_total;
+end;
+$$;
+
 grant usage on schema public to anon, authenticated;
 grant select, insert, update on public.challenge_profiles to authenticated;
 grant select, insert, update on public.challenge_players to anon, authenticated;
 grant select, insert on public.challenge_rounds to anon, authenticated;
 grant usage, select on sequence public.challenge_rounds_id_seq to anon, authenticated;
+grant execute on function public.consume_official_attempt() to authenticated;
 
 alter table public.challenge_profiles enable row level security;
 alter table public.challenge_players enable row level security;

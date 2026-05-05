@@ -14,7 +14,7 @@
       <section class="title-overlay" id="titleOverlay" aria-label="タイトル画面">
         <div class="title-card">
           <div class="broadcast-badge">失敗したら泳いで帰国</div>
-          <div class="title-kicker">公式挑戦はGoogle IDごと10回</div>
+          <div class="title-kicker">この端末で公式10回 / Google証明対応</div>
           <h1><small>ラスワンの</small>負けサビ1億円になるまで<br><span>帰れません</span></h1>
           <p id="titleAttempt">1回目の挑戦。何回でクリアできたか教えてね。</p>
           <div class="story-card-title">
@@ -27,6 +27,10 @@
             <div class="show-card card-red"><span>K</span><b>♥</b></div>
             <div class="show-chip chip-a">10K</div>
             <div class="show-chip chip-b">100K</div>
+            <img class="title-clone clone-thinking" src="assets/characters/lastone-thinking.png" alt="">
+            <img class="title-clone clone-smug" src="assets/characters/lastone-smug.png" alt="">
+            <img class="title-clone clone-crying" src="assets/characters/lastone-crying.png" alt="">
+            <img class="title-clone clone-laughing" src="assets/characters/lastone-laughing.png" alt="">
             <div class="title-showcase-copy">1,000,000円 → 100,000,000円</div>
           </div>
           <div class="title-achievement-mini">
@@ -43,15 +47,15 @@
             <div>
               <span>ログイン</span>
               <strong id="authStatus">確認中</strong>
-              <small id="authHint">ログインして公式挑戦を開始します。</small>
+              <small id="authHint">ログインなしでも公式挑戦を開始できます。</small>
             </div>
-            <button id="googleLogin" type="button">ログインしてゲームスタート</button>
+            <button id="googleLogin" type="button">Googleで証明をつける</button>
             <div class="email-login" id="emailLoginBox">
               <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="メールで認証">
               <button id="emailLogin" type="button">送信</button>
             </div>
           </div>
-          <button class="title-start" id="startGame" type="button">ログインしてゲームスタート</button>
+          <button class="title-start" id="startGame" type="button">公式チャレンジ開始</button>
           <button class="title-sub" id="openHowTo" type="button">遊び方を見る</button>
         </div>
       </section>
@@ -221,6 +225,20 @@
             <button id="newRaceCard" type="button">出走表更新</button>
           </div>
           <div class="race-commentary" id="raceCommentary">競技を選んで単勝を買う。オッズは控除率25%で生成。</div>
+          <div class="race-showcase" aria-label="レース演出">
+            <div class="race-showcase-icon" id="raceShowcaseIcon"></div>
+            <div>
+              <span id="raceVenueLabel">負けサビ競技場</span>
+              <strong id="raceMainCall">単勝で1億まで押し切れ</strong>
+              <small id="raceOddsSummary">控除率25% / 穴はちゃんと穴</small>
+            </div>
+            <img class="race-commentator-face" id="raceCommentatorFace" src="assets/characters/lastone-smug.png" alt="">
+          </div>
+          <div class="race-broadcast" aria-label="レース状況">
+            <div><span>LEADER</span><strong id="raceLeaderName">-</strong></div>
+            <div><span>DISTANCE</span><strong id="raceDistance">待機中</strong></div>
+            <div><span>TENSION</span><strong id="raceTension">通常</strong></div>
+          </div>
           <div class="race-track" id="raceTrack"></div>
           <div class="race-entries" id="raceEntries"></div>
           <div class="race-ticket">
@@ -432,6 +450,12 @@
         <div class="result-card">
           <div class="result-hero" id="resultHero">BANKER WIN</div>
           <img class="result-character" id="resultCharacter" src="assets/characters/lastone-smug.png" alt="結果リアクション">
+          <div class="result-squad" aria-hidden="true">
+            <img src="assets/characters/lastone-thinking.png" alt="">
+            <img src="assets/characters/lastone-smug.png" alt="">
+            <img src="assets/characters/lastone-crying.png" alt="">
+            <img src="assets/characters/lastone-laughing.png" alt="">
+          </div>
           <div class="result-score">
             <div><span>PLAYER</span><strong id="resultPlayerScore">0</strong></div>
             <div><span>BANKER</span><strong id="resultBankerScore">0</strong></div>

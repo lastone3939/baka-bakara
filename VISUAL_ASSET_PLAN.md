@@ -18,6 +18,8 @@
 2. ラスワンキャラ差分
    - 考える、ドヤる、泣く、笑う、泳ぐ、絶望、勝利、タイミーへ向かう。
    - 既存PNGの雰囲気を維持。
+   - 既存4表情はタイトル、実況、結果画面で複数表示済み。
+   - 追加差分は `IMAGE2_PROMPTS.md` の Lastone Character Split Pack で生成する。
 
 3. 競技背景
    - 競馬: ゲームセンター寄りの夜レース場。
@@ -49,3 +51,6 @@
 - `assets/scenes/keirin-race-v1.png`
 - `assets/results/clear-100m-v1.png`
 - `assets/results/swim-home-v1.png`
+- `assets/characters/variants/lastone-victory-v1.png`
+- `assets/characters/variants/lastone-swim-v1.png`
+- `assets/characters/variants/lastone-allin-v1.png`

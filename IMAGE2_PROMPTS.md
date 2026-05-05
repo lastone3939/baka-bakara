@@ -24,6 +24,33 @@ Composition: center area readable for large HTML title text, lower area has spac
 Avoid: real brand logos, copyrighted characters, tiny text, flat vector look, dull beige palette, overly dark unreadable background.
 ```
 
+## Lastone Character Split Pack
+
+Use existing `assets/characters/lastone-*.png` and the two Lastone pet sprites as visual references. Generate each as a separate square PNG, then save the final selected files under `assets/characters/variants/`.
+
+Common instruction for all variants:
+
+```text
+Use case: stylized-concept
+Asset type: square mobile game character reaction portrait
+Primary request: Keep the same Lastone character identity: stylized 3D Japanese avatar, blond swept hair, thick eyebrows, black hoodie with white drawstrings, expressive face, premium mobile game render, clean subject on a flat removable chroma-key background for later cutout.
+Composition: bust-up portrait, large readable expression, centered with generous padding, no embedded text, no watermark.
+Avoid: changing age, changing hairstyle silhouette, different clothing color, realistic human photo, logo, tiny text, extra characters.
+```
+
+Requested variants:
+
+- `lastone-victory-v1.png`: laughing hard, one fist up, ridiculous jackpot confidence.
+- `lastone-bankrupt-v1.png`: crying with both hands on cheeks, dramatic but comedic.
+- `lastone-swim-v1.png`: ready to swim home, wearing a float ring over the black hoodie, funny panic.
+- `lastone-timing-job-v1.png`: determined face, holding a phone with a generic work-shift screen shape, no readable text.
+- `lastone-meteor-v1.png`: shocked face looking up, orange light from a surreal meteor.
+- `lastone-allin-v1.png`: smug dangerous grin, both hands pushing invisible chips forward.
+- `lastone-commentator-v1.png`: excited broadcaster pose, one hand near mouth as if yelling commentary.
+- `lastone-silent-v1.png`: blank stare after losing, soul leaving the body but still cute.
+- `lastone-natural-nine-v1.png`: proud wink, gold sparkle, lucky aura.
+- `lastone-revenge-v1.png`: serious comeback face, blue/red neon rim light.
+
 ## RPG Opening Scene
 
 Save as: `assets/scenes/opening-debt-gate-v1.png`
