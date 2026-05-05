@@ -239,6 +239,10 @@ button {
   font-weight: 950;
 }
 
+#googleLogin {
+  display: none;
+}
+
 .auth-card button {
   border: 1px solid rgba(255, 216, 112, 0.58);
   background: linear-gradient(180deg, rgba(22, 73, 122, 0.96), rgba(6, 13, 24, 0.96));
