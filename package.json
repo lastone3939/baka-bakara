@@ -1,0 +1,9 @@
+{
+  "name": "baccarat-100m-challenge",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node --check app.js && node scripts/build.mjs --check"
+  }
+}

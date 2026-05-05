@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#03070f">
+    <meta name="description" content="100万円を1億円にするまで帰れない、スマホファーストのバカラ資産チャレンジゲーム。">
+    <title>100万円を1億円にするまで帰れない</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.webmanifest">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="title-overlay" id="titleOverlay" aria-label="タイトル画面">
+        <div class="title-card">
+          <div class="broadcast-badge">負けたら泳いで帰国</div>
+          <div class="title-kicker">負けサビ資産チャレンジ</div>
+          <h1><small>負けサビ</small>1億にするまで<br><span>帰れません</span></h1>
+          <p id="titleAttempt">1回目の挑戦。何回でクリアできたか教えてね。</p>
+          <div class="story-card-title">
+            <strong>明日、支払いが1億ある。</strong>
+            <span>手元には、以前韓国で負けた時の「負けサビ」100万円だけ。100万の負けサビってことは、1000万負けたのか...俺、ただやるしかない。</span>
+          </div>
+          <img class="title-character" src="assets/characters/lastone-thinking.png" alt="案内役キャラクター">
+          <div class="title-showcase" aria-hidden="true">
+            <div class="show-card card-blue"><span>A</span><b>♠</b></div>
+            <div class="show-card card-red"><span>K</span><b>♥</b></div>
+            <div class="show-chip chip-a">10K</div>
+            <div class="show-chip chip-b">100K</div>
+            <div class="title-showcase-copy">1,000,000円 → 100,000,000円</div>
+          </div>
+          <div class="title-achievement-mini">
+            <span>実績</span>
+            <strong id="titleAchievementCount">0 / 30</strong>
+            <small>ナチュラルナイン解除を狙え</small>
+          </div>
+          <div class="challenge-card">
+            <div><span>初期所持金</span><strong>1,000,000円</strong></div>
+            <div><span>目標</span><strong>100,000,000円</strong></div>
+            <div><span>条件</span><strong>破産で終了</strong></div>
+          </div>
+          <button class="title-start" id="startGame" type="button">ゲームスタート</button>
+          <button class="title-sub" id="openHowTo" type="button">遊び方を見る</button>
+        </div>
+      </section>
+
+      <section class="game-frame" aria-label="バカラ資産チャレンジ">
+        <header class="topbar">
+          <button class="icon-button" id="menuButton" type="button" aria-label="メニュー">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="mission-tag">
+            <span>バカラ資産チャレンジ</span>
+            <strong>STAGE <b id="stageNumber">1</b></strong>
+            <em id="attemptBadge">1回目の挑戦</em>
+          </div>
+          <button class="mission-button" id="missionButton" type="button" aria-label="ミッション">
+            <span>🏆</span>
+            <small>ミッション</small>
+          </button>
+        </header>
+
+        <section class="bankroll-panel" aria-label="所持金">
+          <div class="label">現在の所持金</div>
+          <div class="money" id="bankroll">¥1,000,000</div>
+          <div class="goal-row">
+            <span>目標</span>
+            <strong>100,000,000円</strong>
+          </div>
+          <div class="progress-track" aria-label="1億円までの進行度">
+            <div class="progress-fill" id="goalProgress"></div>
+          </div>
+        </section>
+
+        <section class="status-strip" aria-label="戦績">
+          <div>
+            <span>連勝</span>
+            <strong id="streak">0</strong>
+          </div>
+          <div>
+            <span>本日の収支</span>
+            <strong id="sessionProfit">±0</strong>
+          </div>
+          <div>
+            <span>勝率</span>
+            <strong id="winRate">0%</strong>
+          </div>
+        </section>
+
+        <section class="story-status" aria-label="ストーリー状況">
+          <div>
+            <span>明日の支払い</span>
+            <strong>100,000,000円</strong>
+          </div>
+          <div>
+            <span>不足額</span>
+            <strong id="debtGap">99,000,000円</strong>
+          </div>
+          <div>
+            <span>失敗時</span>
+            <strong>泳いで帰国</strong>
+          </div>
+        </section>
+
+        <section class="table-stage" aria-label="カード結果">
+          <div class="guide-character" aria-hidden="true">
+            <img src="assets/characters/lastone-thinking.png" alt="">
+            <span>ラスワン<br>実況中</span>
+          </div>
+          <div class="hand-zone player-zone">
+            <h2>PLAYER</h2>
+            <div class="cards" id="playerCards"></div>
+            <div class="score" id="playerScore">-</div>
+          </div>
+
+          <div class="result-seal" id="resultSeal">
+            <span>BET</span>
+            <strong>READY</strong>
+          </div>
+
+          <div class="hand-zone banker-zone">
+            <h2>BANKER</h2>
+            <div class="cards" id="bankerCards"></div>
+            <div class="score" id="bankerScore">-</div>
+          </div>
+
+          <div class="dealer-message" id="dealerMessage">ベットしてカードを配る</div>
+        </section>
+
+        <section class="bet-board" aria-label="ベットエリア">
+          <div class="main-bets">
+            <button class="bet-tile player" data-bet="player" type="button">
+              <span>PLAYER</span><small>1:1</small><b id="bet-player">0</b>
+            </button>
+            <button class="bet-tile tie" data-bet="tie" type="button">
+              <span>TIE</span><small>8:1</small><b id="bet-tie">0</b>
+            </button>
+            <button class="bet-tile banker" data-bet="banker" type="button">
+              <span>BANKER</span><small>0.95:1</small><b id="bet-banker">0</b>
+            </button>
+          </div>
+
+          <div class="side-bets">
+            <button class="side-tile big" data-bet="bigTiger" type="button">
+              <span>BIG TIGER</span><small>50:1</small><b id="bet-bigTiger">0</b>
+            </button>
+            <button class="side-tile small" data-bet="smallTiger" type="button">
+              <span>SMALL TIGER</span><small>22:1</small><b id="bet-smallTiger">0</b>
+            </button>
+            <button class="side-tile pair player-pair" data-bet="playerPair" type="button">
+              <span>P PAIR</span><small>11:1</small><b id="bet-playerPair">0</b>
+            </button>
+            <button class="side-tile pair banker-pair" data-bet="bankerPair" type="button">
+              <span>B PAIR</span><small>11:1</small><b id="bet-bankerPair">0</b>
+            </button>
+          </div>
+        </section>
+
+        <section class="chip-deck" aria-label="チップ選択">
+          <button class="chip selected" data-chip="1000" type="button">1K</button>
+          <button class="chip green" data-chip="5000" type="button">5K</button>
+          <button class="chip blue" data-chip="10000" type="button">10K</button>
+          <button class="chip purple" data-chip="50000" type="button">50K</button>
+          <button class="chip gold" data-chip="100000" type="button">100K</button>
+        </section>
+
+        <section class="bet-control" aria-label="ベット操作">
+          <button id="clearBet" class="mini-control" type="button">クリア</button>
+          <button id="minusBet" class="round-control" type="button" aria-label="ベット額を下げる">−</button>
+          <div class="current-bet">
+            <span>ベット額</span>
+            <strong id="currentChip">1,000</strong>
+          </div>
+          <button id="plusBet" class="round-control" type="button" aria-label="ベット額を上げる">＋</button>
+          <button id="repeatBet" class="mini-control" type="button">リピート</button>
+        </section>
+
+        <section class="power-controls" aria-label="特殊操作">
+          <button id="allInBet" class="all-in-control" type="button">
+            <span>ALL IN</span>
+            <small id="allInTarget">BANKERに残り全額</small>
+          </button>
+          <button id="storyButton" class="story-control" type="button">ストーリー</button>
+        </section>
+
+        <button class="confirm-button" id="dealButton" type="button">
+          <span id="dealButtonText">ベット確定</span>
+          <small id="totalBet">合計 0</small>
+        </button>
+
+        <section class="road-panel" aria-label="最近の履歴">
+          <div class="road-title">
+            <span>最近の履歴（ビッグロード）</span>
+            <button id="moreHistory" type="button">もっと見る</button>
+          </div>
+          <div class="road" id="road"></div>
+        </section>
+
+        <nav class="bottom-nav" aria-label="画面切り替え">
+          <button class="nav-item active" data-tab="main" type="button">
+            <span>♠</span><small>メイン</small>
+          </button>
+          <button class="nav-item" data-tab="history" type="button">
+            <span>◷</span><small>履歴</small>
+          </button>
+          <button class="nav-item" data-tab="stats" type="button">
+            <span>▥</span><small>統計</small>
+          </button>
+          <button class="nav-item" data-tab="rules" type="button">
+            <span>⚙</span><small>設定</small>
+          </button>
+        </nav>
+      </section>
+
+      <aside class="panel-drawer" id="drawer" aria-hidden="true">
+        <div class="drawer-card">
+          <button class="close-button" data-close="drawer" type="button" aria-label="閉じる">×</button>
+          <div class="tab-panel active" id="panel-main">
+            <h2>負けサビの夜</h2>
+            <p>明日までに1億円の支払い。手元にあるのは、韓国で負けたあとに残った負けサビ100万円だけ。1億にするまで帰れません。負けたら泳いで帰国です。</p>
+            <div class="info-grid">
+              <div><span>PLAYER</span><strong>1:1</strong></div>
+              <div><span>BANKER</span><strong>0.95:1</strong></div>
+              <div><span>TIE</span><strong>8:1</strong></div>
+              <div><span>BIG TIGER</span><strong>50:1</strong></div>
+              <div><span>SMALL TIGER</span><strong>22:1</strong></div>
+              <div><span>P PAIR</span><strong>11:1</strong></div>
+              <div><span>B PAIR</span><strong>11:1</strong></div>
+            </div>
+            <div class="rule-list story-beats">
+              <div><strong>第1幕</strong><span>負けサビ100万円からスタート</span></div>
+              <div><strong>第2幕</strong><span>1000万円で「まだ帰れない」ゾーン</span></div>
+              <div><strong>最終幕</strong><span>1億円で支払い完了、帰国確定</span></div>
+            </div>
+          </div>
+          <div class="tab-panel" id="panel-history">
+            <h2>履歴・ロード</h2>
+            <div class="road-dashboard">
+              <section class="road-card-main">
+                <div class="road-head">
+                  <strong>ビッグロード</strong>
+                  <span id="roadSummary">まだ履歴なし</span>
+                </div>
+                <div class="big-road-grid" id="bigRoadGrid"></div>
+              </section>
+              <section class="road-card-main">
+                <div class="road-head">
+                  <strong>ビードプレート</strong>
+                  <span>直近42局</span>
+                </div>
+                <div class="bead-plate" id="beadPlate"></div>
+              </section>
+              <section class="road-card-main">
+                <div class="road-head">
+                  <strong>直近の流れ</strong>
+                  <span id="trendSummary">-</span>
+                </div>
+                <div class="trend-strip" id="trendStrip"></div>
+              </section>
+            </div>
+            <div class="history-list" id="historyList"></div>
+          </div>
+          <div class="tab-panel" id="panel-stats">
+            <h2>統計</h2>
+            <div class="chart-card">
+              <div class="chart-title">収支推移</div>
+              <div class="sparkline" id="sparkline"></div>
+            </div>
+            <div class="info-grid">
+              <div><span>総ラウンド</span><strong id="rounds">0</strong></div>
+              <div><span>最高所持金</span><strong id="maxBankroll">¥1,000,000</strong></div>
+              <div><span>最大連勝</span><strong id="bestStreak">0</strong></div>
+              <div><span>最大到達率</span><strong id="bestProgress">1%</strong></div>
+            </div>
+          </div>
+          <div class="tab-panel" id="panel-achievements">
+            <h2>ミッション実績</h2>
+            <p>勝ち方、流れ、サイドベット、到達金額で実績が解除されます。ゲーム性はそのまま、配信で盛り上がる称号集めです。</p>
+            <div class="achievement-progress">
+              <span id="achievementSummary">0 / 30 解除</span>
+              <div><i id="achievementProgressFill"></i></div>
+            </div>
+            <div class="achievement-grid" id="achievementGrid"></div>
+          </div>
+          <div class="tab-panel" id="panel-rules">
+            <h2>ルール・設定</h2>
+            <p>プレイヤーとバンカーにカードが配られ、標準バカラのドロールールで自動判定します。1億円を目指すため、再挑戦すると挑戦回数が増えます。</p>
+            <div class="rule-list">
+              <div><strong>Big Tiger</strong><span>バンカーが3枚で6点勝ち: 50:1</span></div>
+              <div><strong>Small Tiger</strong><span>バンカーが2枚で6点勝ち: 22:1</span></div>
+              <div><strong>Player Pair</strong><span>プレイヤー最初の2枚が同ランク: 11:1</span></div>
+              <div><strong>Banker Pair</strong><span>バンカー最初の2枚が同ランク: 11:1</span></div>
+              <div><strong>第3カード</strong><span>標準バカラの自動ドロールールで判定</span></div>
+              <div><strong>挑戦回数</strong><span>リセットや再挑戦を押すたびに次の挑戦として記録</span></div>
+            </div>
+            <div class="setting-row">
+              <span>サウンド</span>
+              <button class="toggle active" id="soundToggle" type="button">ON</button>
+            </div>
+            <div class="setting-row">
+              <span>バイブ</span>
+              <button class="toggle active" id="vibeToggle" type="button">ON</button>
+            </div>
+            <button class="danger-soft" id="resetGame" type="button">最初から再挑戦</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="ending-overlay" id="endingOverlay" aria-hidden="true">
+        <div class="ending-card">
+          <h1 id="endingTitle">1億達成!</h1>
+          <p id="endingMessage">あなたの逆転劇は伝説になった。</p>
+          <div class="ending-money" id="endingMoney">¥100,000,000</div>
+          <div class="ending-actions">
+            <button id="endingStats" type="button">結果を見る</button>
+            <button id="restartGame" type="button">もう一度挑戦</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="result-overlay" id="resultOverlay" aria-hidden="true">
+        <div class="result-card">
+          <div class="result-hero" id="resultHero">BANKER WIN</div>
+          <img class="result-character" id="resultCharacter" src="assets/characters/lastone-smug.png" alt="結果リアクション">
+          <div class="result-score">
+            <div><span>PLAYER</span><strong id="resultPlayerScore">0</strong></div>
+            <div><span>BANKER</span><strong id="resultBankerScore">0</strong></div>
+          </div>
+          <div class="result-profit" id="resultProfit">±0円</div>
+          <div class="result-comment" id="resultComment">次の勝負へ。</div>
+          <div class="result-breakdown" id="resultBreakdown"></div>
+          <button class="next-round" id="nextRound" type="button">次の勝負へ</button>
+          <button class="result-sub" id="resultHistory" type="button">履歴を見る</button>
+        </div>
+      </section>
+
+      <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
+      <div class="achievement-toast" id="achievementToast" aria-live="polite" aria-hidden="true">
+        <span>実績解除</span>
+        <strong id="achievementToastTitle">ナチュラルナイン</strong>
+        <small id="achievementToastDesc">最初の2枚で9点</small>
+      </div>
+    </main>
+
+    <script src="public-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
