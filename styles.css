@@ -73,7 +73,8 @@ button {
 }
 
 .title-card {
-  width: min(calc(100vw - 24px), 430px);
+  width: calc(100dvw - 24px);
+  max-width: 430px;
   min-height: min(780px, calc(100svh - 24px));
   display: grid;
   align-content: start;
