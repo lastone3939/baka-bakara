@@ -41,17 +41,17 @@
           </div>
           <div class="auth-card" id="authCard">
             <div>
-              <span>公式ログイン</span>
+              <span>ログイン</span>
               <strong id="authStatus">確認中</strong>
-              <small id="authHint">Google認証が使えると10回以内達成の証拠を残せます。</small>
+              <small id="authHint">ログインして公式挑戦を開始します。</small>
             </div>
-            <button id="googleLogin" type="button">Googleで公式挑戦</button>
+            <button id="googleLogin" type="button">ログインしてゲームスタート</button>
             <div class="email-login" id="emailLoginBox">
               <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="メールで認証">
               <button id="emailLogin" type="button">送信</button>
             </div>
           </div>
-          <button class="title-start" id="startGame" type="button">ゲームスタート</button>
+          <button class="title-start" id="startGame" type="button">ログインしてゲームスタート</button>
           <button class="title-sub" id="openHowTo" type="button">遊び方を見る</button>
         </div>
       </section>
@@ -59,10 +59,23 @@
       <section class="story-overlay" id="storyOverlay" aria-label="オープニングストーリー" aria-hidden="true">
         <div class="story-cinema">
           <div class="story-timer"><span id="storyTimer">30</span>秒</div>
-          <img src="assets/characters/lastone-thinking.png" alt="ラスワン" class="story-character">
+          <div class="story-world" aria-hidden="true">
+            <div class="story-skyline"></div>
+            <div class="story-debt-gate">
+              <span>DEBT</span>
+              <strong>100,000,000</strong>
+            </div>
+            <div class="story-runway"></div>
+            <div class="story-chip-orbit chip-one">100万</div>
+            <div class="story-chip-orbit chip-two">1億</div>
+          </div>
+          <img src="assets/characters/lastone-thinking.png" alt="ラスワン" class="story-character" id="storyCharacter">
           <div class="story-scene-label" id="storySceneLabel">第1幕</div>
           <h2 id="storyHeadline">明日、支払いが1億ある。</h2>
           <p id="storyText">手元には負けサビ100万円だけ。帰る道はない。</p>
+          <div class="story-roll" aria-label="ストーリーテキスト">
+            <div id="storyRollText"></div>
+          </div>
           <div class="story-progress"><i id="storyProgress"></i></div>
           <div class="story-no-skip">スキップ不可 / 人生はスキップできません</div>
         </div>

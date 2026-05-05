@@ -21,23 +21,40 @@ const STORY_SCENES = [
   {
     label: "第1幕 / 明日",
     headline: "明日、支払いが1億ある。",
-    text: "日本で負け続けたラスワン。スマホを見るたび、通知より先に現実が刺してくる。"
+    text: "日本で負け続けたラスワン。スマホを見るたび、通知より先に現実が刺してくる。",
+    face: "thinking"
   },
   {
     label: "第2幕 / 記憶",
     headline: "そういえば韓国に、負けサビがある。",
-    text: "残っているのは100万円。100万の負けサビってことは、あの日いくら燃えたんだ。"
+    text: "残っているのは100万円。100万の負けサビってことは、あの日いくら燃えたんだ。",
+    face: "smug"
   },
   {
     label: "第3幕 / 出発",
     headline: "帰りのチケットは、まだ買わない。",
-    text: "バカラ、競馬、競艇、競輪。増やせなければ、泳いで帰国。水温だけは見ない。"
+    text: "バカラ、競馬、競艇、競輪。増やせなければ、泳いで帰国。水温だけは見ない。",
+    face: "thinking"
   },
   {
     label: "最終幕 / 公式挑戦",
     headline: "10回以内に、1億へ。",
-    text: "これは無料の仮想チップゲーム。だけど、スクショに残るドラマだけは本物でいく。"
+    text: "これは無料の仮想チップゲーム。だけど、スクショに残るドラマだけは本物でいく。",
+    face: "laughing"
   }
+];
+
+const STORY_ROLL_LINES = [
+  "ラスワンは明日の1億円支払いから逃げていた。",
+  "通知は鳴らない。鳴っているのは心拍と残高アプリだけ。",
+  "その時、脳裏に韓国で残した負けサビ100万円がよみがえる。",
+  "100万円の負けサビ。それはつまり、前回の負け方がだいぶ終わっていたという証拠。",
+  "だが、帰るには増やすしかない。",
+  "舞台はバカラ卓、競馬場、水面、そしてバンクへ。",
+  "10回以内に1億へ届けば伝説。",
+  "届かなければ、泳いで帰国。",
+  "これは無料の仮想チップゲーム。",
+  "それでもラスワンの顔だけは、やけに本気だった。"
 ];
 
 const FAILURE_ENDINGS = [
@@ -816,9 +833,9 @@ function renderCards(round) {
 }
 
 function officialStatusText() {
-  if (!supabaseReady()) return "デモ / Supabase未設定";
+  if (!supabaseReady()) return "ゲストプレイ";
   if (!authReady) return "認証確認中";
-  if (!authUser) return "Googleログイン待ち";
+  if (!authUser) return "ログイン待ち";
   const left = Math.max(0, OFFICIAL_ATTEMPT_LIMIT - meta.officialAttemptsUsed);
   if (meta.currentAttemptOfficial) return `公式 ${meta.officialAttemptsUsed}/${OFFICIAL_ATTEMPT_LIMIT}`;
   if (left <= 0) return "公式枠終了 / フリー";
@@ -833,11 +850,12 @@ function renderAuth() {
   if (!status || !hint || !google) return;
 
   if (!supabaseReady()) {
-    status.textContent = "デモモード";
-    hint.textContent = "Supabase設定後、Google IDごとの公式10回制限が有効になります。";
-    google.disabled = true;
-    google.textContent = "Supabase未設定";
+    status.textContent = "ゲストプレイ";
+    hint.textContent = "このまま体験プレイできます。クリアしたらスクショで証明できます。";
+    google.disabled = false;
+    google.textContent = "ゲストでゲームスタート";
     if (emailBox) emailBox.style.display = "none";
+    $("#startGame").textContent = "ゲストでゲームスタート";
     return;
   }
 
@@ -846,6 +864,7 @@ function renderAuth() {
     status.textContent = "認証確認中";
     hint.textContent = "ログイン状態を確認しています。";
     google.textContent = "確認中";
+    $("#startGame").textContent = "準備中";
     return;
   }
 
@@ -854,17 +873,19 @@ function renderAuth() {
     hint.textContent = meta.officialAttemptsUsed >= OFFICIAL_ATTEMPT_LIMIT
       ? "公式10回は終了。以降はフリープレイです。"
       : "このアカウントで公式達成証明を残せます。";
-    google.textContent = "ログイン済み";
-    google.disabled = true;
+    google.textContent = "ゲームスタート";
+    google.disabled = false;
+    $("#startGame").textContent = "ゲームスタート";
     if (emailBox) emailBox.style.display = "none";
     return;
   }
 
   status.textContent = "未ログイン";
-  hint.textContent = "公式挑戦にはGoogleログインが必要です。メール認証も使えます。";
-  google.textContent = "Googleで公式挑戦";
+  hint.textContent = "Googleログインで公式挑戦を開始します。";
+  google.textContent = "Googleでログイン";
   google.disabled = false;
-  if (emailBox) emailBox.style.display = "grid";
+  $("#startGame").textContent = "ログインしてゲームスタート";
+  if (emailBox) emailBox.style.display = "none";
 }
 
 function renderSportTabs() {
@@ -1984,8 +2005,10 @@ async function startGameFlow(openRules = false) {
     return;
   }
   if (supabaseReady() && authReady && !authUser) {
-    $("#authHint").textContent = "公式挑戦にはログインが必要です。Googleかメールで認証してください。";
-    playTone("danger");
+    $("#authHint").textContent = "Googleログイン画面へ移動します。";
+    sessionStorage.setItem(`${STORAGE_KEY}-pending-start`, openRules ? "rules" : "game");
+    playTone("start");
+    await loginWithGoogle();
     return;
   }
   await consumeOfficialAttempt();
@@ -2006,9 +2029,17 @@ async function startGameFlow(openRules = false) {
 
 function playOpeningStory() {
   const overlay = $("#storyOverlay");
+  const cinema = overlay.querySelector(".story-cinema");
   const progress = $("#storyProgress");
+  const roll = $("#storyRollText");
   overlay.classList.add("open");
   overlay.setAttribute("aria-hidden", "false");
+  if (roll) {
+    roll.innerHTML = STORY_ROLL_LINES.map((line) => `<span>${line}</span>`).join("");
+    roll.style.animation = "none";
+    void roll.offsetWidth;
+    roll.style.animation = "";
+  }
   const started = Date.now();
   let lastScene = -1;
   playTone("story");
@@ -2022,9 +2053,12 @@ function playOpeningStory() {
       const sceneIndex = Math.min(STORY_SCENES.length - 1, Math.floor(ratio * STORY_SCENES.length));
       if (sceneIndex !== lastScene) {
         const scene = STORY_SCENES[sceneIndex];
+        cinema?.style.setProperty("--story-scene", sceneIndex);
+        cinema?.setAttribute("data-scene", String(sceneIndex + 1));
         $("#storySceneLabel").textContent = scene.label;
         $("#storyHeadline").textContent = scene.headline;
         $("#storyText").textContent = scene.text;
+        $("#storyCharacter").src = `assets/characters/lastone-${scene.face}.png`;
         playTone("panel");
         lastScene = sceneIndex;
       }
@@ -2122,6 +2156,11 @@ async function applyAuthUser(user) {
   saveMeta();
   render();
   syncPlayer();
+  const pendingStart = sessionStorage.getItem(`${STORAGE_KEY}-pending-start`);
+  if (pendingStart) {
+    sessionStorage.removeItem(`${STORAGE_KEY}-pending-start`);
+    startGameFlow(pendingStart === "rules");
+  }
 }
 
 async function loadOfficialProfile() {
@@ -2188,7 +2227,7 @@ async function consumeOfficialAttempt() {
 
 async function loginWithGoogle() {
   if (!supabaseClient) {
-    playTone("danger");
+    startGameFlow(false);
     return;
   }
   await supabaseClient.auth.signInWithOAuth({
@@ -2319,7 +2358,7 @@ function wireEvents() {
 
   $("#startGame").addEventListener("click", () => startGameFlow(false));
   $("#openHowTo").addEventListener("click", () => startGameFlow(true));
-  $("#googleLogin").addEventListener("click", loginWithGoogle);
+  $("#googleLogin").addEventListener("click", () => startGameFlow(false));
   $("#emailLogin").addEventListener("click", loginWithEmail);
 
   $$(".bet-tile, .side-tile").forEach((button) => {
