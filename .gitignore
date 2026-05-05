@@ -8,3 +8,6 @@ screenshots/
 dist/
 *.zip
 assets/characters/*.gif
+
+# Local Netlify folder
+.netlify
