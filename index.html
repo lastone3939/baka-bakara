@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
     <meta name="theme-color" content="#03070f">
-    <meta name="description" content="100万円を1億円にするまで帰れない、スマホファーストのバカラ資産チャレンジゲーム。">
-    <title>100万円を1億円にするまで帰れない</title>
+    <meta name="description" content="ラスワンの負けサビ100万円を1億円にするまで帰れない、スマホファーストの逆転チャレンジゲーム。">
+    <title>ラスワンの負けサビ1億円になるまで帰れません</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.webmanifest">
   </head>
@@ -13,13 +13,13 @@
     <main class="app-shell">
       <section class="title-overlay" id="titleOverlay" aria-label="タイトル画面">
         <div class="title-card">
-          <div class="broadcast-badge">負けたら泳いで帰国</div>
-          <div class="title-kicker">負けサビ資産チャレンジ</div>
-          <h1><small>負けサビ</small>1億にするまで<br><span>帰れません</span></h1>
+          <div class="broadcast-badge">失敗したら泳いで帰国</div>
+          <div class="title-kicker">公式挑戦はGoogle IDごと10回</div>
+          <h1><small>ラスワンの</small>負けサビ1億円になるまで<br><span>帰れません</span></h1>
           <p id="titleAttempt">1回目の挑戦。何回でクリアできたか教えてね。</p>
           <div class="story-card-title">
             <strong>明日、支払いが1億ある。</strong>
-            <span>手元には、以前韓国で負けた時の「負けサビ」100万円だけ。100万の負けサビってことは、1000万負けたのか...俺、ただやるしかない。</span>
+            <span>日本で負け続け、追い詰められたラスワン。そういえば韓国に負けサビ100万円があった。100万の負けサビってことは、あの時いくら負けたんだ。俺、ただやるしかない。</span>
           </div>
           <img class="title-character" src="assets/characters/lastone-thinking.png" alt="案内役キャラクター">
           <div class="title-showcase" aria-hidden="true">
@@ -37,10 +37,63 @@
           <div class="challenge-card">
             <div><span>初期所持金</span><strong>1,000,000円</strong></div>
             <div><span>目標</span><strong>100,000,000円</strong></div>
-            <div><span>条件</span><strong>破産で終了</strong></div>
+            <div><span>公式挑戦</span><strong id="titleAttemptLimit">0 / 10</strong></div>
+          </div>
+          <div class="auth-card" id="authCard">
+            <div>
+              <span>公式ログイン</span>
+              <strong id="authStatus">確認中</strong>
+              <small id="authHint">Google認証が使えると10回以内達成の証拠を残せます。</small>
+            </div>
+            <button id="googleLogin" type="button">Googleで公式挑戦</button>
+            <div class="email-login" id="emailLoginBox">
+              <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="メールで認証">
+              <button id="emailLogin" type="button">送信</button>
+            </div>
           </div>
           <button class="title-start" id="startGame" type="button">ゲームスタート</button>
           <button class="title-sub" id="openHowTo" type="button">遊び方を見る</button>
+        </div>
+      </section>
+
+      <section class="story-overlay" id="storyOverlay" aria-label="オープニングストーリー" aria-hidden="true">
+        <div class="story-cinema">
+          <div class="story-timer"><span id="storyTimer">30</span>秒</div>
+          <img src="assets/characters/lastone-thinking.png" alt="ラスワン" class="story-character">
+          <div class="story-scene-label" id="storySceneLabel">第1幕</div>
+          <h2 id="storyHeadline">明日、支払いが1億ある。</h2>
+          <p id="storyText">手元には負けサビ100万円だけ。帰る道はない。</p>
+          <div class="story-progress"><i id="storyProgress"></i></div>
+          <div class="story-no-skip">スキップ不可 / 人生はスキップできません</div>
+        </div>
+      </section>
+
+      <section class="venue-overlay" id="venueOverlay" aria-label="競技選択" aria-hidden="true">
+        <div class="venue-card">
+          <button class="close-button venue-close" id="closeVenue" type="button" aria-label="閉じる">×</button>
+          <div class="venue-head">
+            <span>負けサビロビー</span>
+            <h2>競技を選ぶ</h2>
+            <p>一度ロビーに戻ってから、専用テーブルへ入場。大手ゲームっぽく、競技ごとに画面を切り替えます。</p>
+          </div>
+          <div class="venue-grid">
+            <button class="venue-option baccarat" data-venue-sport="baccarat" type="button">
+              <span>♠</span><strong>バカラ</strong><small>負けサビ本店 / サイドベットあり</small>
+            </button>
+            <button class="venue-option horse" data-venue-sport="horse" type="button">
+              <span>馬</span><strong>競馬</strong><small>8/12頭ランダム / 単勝</small>
+            </button>
+            <button class="venue-option boat" data-venue-sport="boat" type="button">
+              <span>艇</span><strong>競艇</strong><small>6艇固定 / 単勝</small>
+            </button>
+            <button class="venue-option keirin" data-venue-sport="keirin" type="button">
+              <span>輪</span><strong>競輪</strong><small>9車固定 / 単勝</small>
+            </button>
+          </div>
+          <div class="venue-footer">
+            <span>現在の所持金</span>
+            <strong id="venueBankroll">¥1,000,000</strong>
+          </div>
         </div>
       </section>
 
@@ -50,7 +103,7 @@
             <span></span><span></span><span></span>
           </button>
           <div class="mission-tag">
-            <span>バカラ資産チャレンジ</span>
+            <span id="modeTitle">負けサビ資産チャレンジ</span>
             <strong>STAGE <b id="stageNumber">1</b></strong>
             <em id="attemptBadge">1回目の挑戦</em>
           </div>
@@ -102,7 +155,26 @@
           </div>
         </section>
 
-        <section class="table-stage" aria-label="カード結果">
+        <section class="official-status" aria-label="公式挑戦ステータス">
+          <div>
+            <span>公式挑戦</span>
+            <strong id="officialAttemptStatus">未ログイン</strong>
+          </div>
+          <div>
+            <span>現在の競技</span>
+            <strong id="currentSportName">バカラ</strong>
+          </div>
+        </section>
+
+        <section class="sport-gate" aria-label="競技ロビー">
+          <div>
+            <span>入場中</span>
+            <strong id="venueCurrentName">バカラ</strong>
+          </div>
+          <button id="openVenue" type="button">競技選択へ戻る</button>
+        </section>
+
+        <section class="table-stage baccarat-only" aria-label="カード結果">
           <div class="guide-character" aria-hidden="true">
             <img src="assets/characters/lastone-thinking.png" alt="">
             <span>ラスワン<br>実況中</span>
@@ -127,7 +199,25 @@
           <div class="dealer-message" id="dealerMessage">ベットしてカードを配る</div>
         </section>
 
-        <section class="bet-board" aria-label="ベットエリア">
+        <section class="race-stage race-only" id="raceStage" aria-label="レース">
+          <div class="race-header">
+            <div>
+              <span id="raceTypeLabel">競馬</span>
+              <strong id="raceName">負けサビ記念</strong>
+            </div>
+            <button id="newRaceCard" type="button">出走表更新</button>
+          </div>
+          <div class="race-commentary" id="raceCommentary">競技を選んで単勝を買う。オッズは控除率25%で生成。</div>
+          <div class="race-track" id="raceTrack"></div>
+          <div class="race-entries" id="raceEntries"></div>
+          <div class="race-ticket">
+            <span>単勝チケット</span>
+            <strong id="raceTicketName">未選択</strong>
+            <b id="raceTicketAmount">0円</b>
+          </div>
+        </section>
+
+        <section class="bet-board baccarat-only" aria-label="ベットエリア">
           <div class="main-bets">
             <button class="bet-tile player" data-bet="player" type="button">
               <span>PLAYER</span><small>1:1</small><b id="bet-player">0</b>
@@ -180,7 +270,7 @@
             <span>ALL IN</span>
             <small id="allInTarget">BANKERに残り全額</small>
           </button>
-          <button id="storyButton" class="story-control" type="button">ストーリー</button>
+          <button id="venueButton" class="story-control" type="button">ロビー</button>
         </section>
 
         <button class="confirm-button" id="dealButton" type="button">
@@ -190,7 +280,7 @@
 
         <section class="road-panel" aria-label="最近の履歴">
           <div class="road-title">
-            <span>最近の履歴（ビッグロード）</span>
+            <span id="historyTitle">最近の履歴（ビッグロード）</span>
             <button id="moreHistory" type="button">もっと見る</button>
           </div>
           <div class="road" id="road"></div>
@@ -311,10 +401,17 @@
           <h1 id="endingTitle">1億達成!</h1>
           <p id="endingMessage">あなたの逆転劇は伝説になった。</p>
           <div class="ending-money" id="endingMoney">¥100,000,000</div>
+          <div class="ending-ticker" id="endingTicker" aria-live="polite" aria-hidden="true"></div>
+          <div class="share-proof" id="shareProof">
+            <span>公式証明</span>
+            <strong id="proofText">スクショしてXへ</strong>
+          </div>
           <div class="ending-actions">
-            <button id="endingStats" type="button">結果を見る</button>
+            <button id="shareResult" type="button">Xに投稿</button>
             <button id="restartGame" type="button">もう一度挑戦</button>
           </div>
+          <button id="titleReturn" class="ending-sub" type="button">タイトルへ戻る</button>
+          <button id="endingStats" class="ending-sub" type="button">結果を見る</button>
         </div>
       </section>
 
@@ -342,6 +439,7 @@
       </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="public-config.js"></script>
     <script src="app.js"></script>
   </body>

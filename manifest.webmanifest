@@ -1,12 +1,12 @@
 {
-  "name": "負けサビ 1億にするまで帰れません",
-  "short_name": "負けサビ",
+  "name": "ラスワンの負けサビ1億円になるまで帰れません",
+  "short_name": "負けサビ1億",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#03070f",
   "theme_color": "#03070f",
   "orientation": "portrait",
-  "description": "負けサビ100万円から1億円を目指す、スマホファーストのバカラ資産チャレンジ。",
+  "description": "負けサビ100万円から1億円を目指す、バカラ・競馬・競艇・競輪のスマホファースト逆転ゲーム。",
   "icons": [
     {
       "src": "assets/icons/icon-192.png",

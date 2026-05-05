@@ -1,6 +1,6 @@
 # 無料公開手順
 
-一番簡単に公開するなら、Netlify DropでOKです。SupabaseやRenderは、後からログ保存や本格運用をしたくなった時だけで大丈夫です。
+一番簡単に公開するなら、Netlify DropでOKです。Google公式挑戦10回制限まで使う場合は、Supabaseを設定してからNetlifyに環境変数を入れます。
 
 ## 1. Netlify Dropで公開
 
@@ -26,19 +26,22 @@
 - タイトル画面が出る
 - 連打しても画面がズームしない
 - ベットしてカードが配られる
+- 競馬・競艇・競輪に切り替えて単勝レースが始まる
 - 結果画面が出る
 - ミッション実績画面に30個表示される
 - 履歴・ロードが増える
 
 ## 追加で本格運用したい場合
 
-Supabaseを使うと挑戦ログを保存できます。未設定でもゲーム自体は動き、挑戦回数と履歴はブラウザ内に保存されます。
+Supabaseを使うとGoogleログイン、公式挑戦10回制限、挑戦ログ保存が有効になります。未設定でもデモモードでゲーム自体は動き、挑戦回数と履歴はブラウザ内に保存されます。
 
 ### Supabase
 
 1. Supabaseで新規プロジェクトを作る
-2. SQL Editorで `supabase/schema.sql` を実行
-3. Project Settings > API でProject URLとanon / publishable keyを控える
+2. Authentication > Providers でGoogleを有効化する
+3. Google Cloud側でOAuth Clientを作り、SupabaseのCallback URLを登録する
+4. SQL Editorで `supabase/schema.sql` を実行
+5. Project Settings > API でProject URLとanon / publishable keyを控える
 
 ### Render
 
@@ -56,3 +59,4 @@ Supabaseを使うと挑戦ログを保存できます。未設定でもゲーム
 - 画像はPNGのみ公開されるように `dist/` に絞っています
 - Supabase未設定でもゲームは動きます
 - 本番では公開してよいanon / publishable keyだけを使います
+- 実際のお金や景品抽選処理はアプリ内に入れていません

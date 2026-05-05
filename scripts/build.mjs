@@ -1,4 +1,5 @@
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const checkOnly = process.argv.includes("--check");
 const config = {
@@ -22,16 +23,23 @@ if (checkOnly) {
   console.log("build check ok");
 } else {
   await rm("dist", { recursive: true, force: true });
-  await mkdir("dist/assets/characters", { recursive: true });
-  await mkdir("dist/assets/icons", { recursive: true });
+  await mkdir("dist/assets", { recursive: true });
   await Promise.all(publicFiles.map((file) => cp(file, `dist/${file}`)));
-  const characterFiles = await readdir("assets/characters");
-  await Promise.all(
-    characterFiles
-      .filter((file) => file.endsWith(".png"))
-      .map((file) => cp(`assets/characters/${file}`, `dist/assets/characters/${file}`))
-  );
-  await cp("assets/icons", "dist/assets/icons", { recursive: true });
+  await copyAssets("assets", "dist/assets");
   await writeFile("dist/public-config.js", output);
   console.log("dist generated");
+}
+
+async function copyAssets(from, to) {
+  await mkdir(to, { recursive: true });
+  const entries = await readdir(from, { withFileTypes: true });
+  await Promise.all(entries.map(async (entry) => {
+    const source = join(from, entry.name);
+    const target = join(to, entry.name);
+    if (entry.isDirectory()) {
+      await copyAssets(source, target);
+      return;
+    }
+    if (/\.(png|jpg|jpeg|webp|svg)$/i.test(entry.name)) await cp(source, target);
+  }));
 }
